@@ -1,19 +1,14 @@
 'use strict';
 
 /**
+ * Translate English to Korean, using Naver API
  * @param text : English string to translate
- * @return translated Korean string (by Naver translate API)
+ * @return translated Korean string
  */
 
 const https = require('https');
 const querystring = require('querystring');
-/**
- * Pass the data to send as `event.data`, and the request options as
- * `event.options`. For more information see the HTTPS module documentation
- * at https://nodejs.org/api/https.html.
- *
- * Will succeed with the response body.
- */
+
 exports.handler = (event, context, callback) => {
     var options = {
         hostname: 'openapi.naver.com',
