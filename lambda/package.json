@@ -1,0 +1,9 @@
+{
+	"name": "kalexa",
+	"version": "1.0.0",
+	"dependencies": {
+		"aws-sdk": "^2.5.2",
+		"cheerio": "^0.22.0",
+		"request": "^2.75.0"
+	}
+}
