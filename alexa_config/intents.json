@@ -1,0 +1,22 @@
+{
+  "intents": [
+    {
+      "intent": "HelloIntent",
+      "slots" : [
+      	{ 
+		  "name" : "EmotionName",
+		  "type" : "Emotion"
+    	}
+      ]
+    },
+    {
+      "intent": "QuizIntent"
+    },
+    {
+      "intent": "AMAZON.HelpIntent"
+    },
+    {
+      "intent": "AMAZON.StopIntent"
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+HelloIntent you are so nice
+HelloIntent beautiful night {EmotionName}
+
+QuizIntent Let's play quiz
