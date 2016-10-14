@@ -1,22 +1,28 @@
 {
-  "intents": [
-    {
-      "intent": "HelloIntent",
-      "slots" : [
-      	{ 
-		  "name" : "EmotionName",
-		  "type" : "Emotion"
-    	}
-      ]
-    },
-    {
-      "intent": "QuizIntent"
-    },
-    {
-      "intent": "AMAZON.HelpIntent"
-    },
-    {
-      "intent": "AMAZON.StopIntent"
-    }
-  ]
+    "intents": [
+        {
+            "intent": "AMAZON.ResumeIntent"
+        },
+        {
+            "intent": "AMAZON.PauseIntent"
+        },
+        {
+            "intent": "HelloIntent",
+            "slots": [
+                {
+                    "name": "EmotionName",
+                    "type": "Emotion"
+                }
+            ]
+        },
+        {
+            "intent": "QuizIntent"
+        },
+        {
+            "intent": "AMAZON.HelpIntent"
+        },
+        {
+            "intent": "AMAZON.StopIntent"
+        }
+    ]
 }
