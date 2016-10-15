@@ -54,18 +54,23 @@ exports.handler = (event, context, callback) => {
                     chart[i].artists[j].artistName = src.artists.artist[j].artistName;
                 }
             }
-            //invoke UpdateChart lambda function
+
+            //update chart data
             var lambda = new aws.Lambda();
+            var payload = {
+                tableName: 'kpop_chart',
+                key: {'chart': 'realtimeChart'},
+                updateExpression: 'set chartData = :chartData',
+                expressionAttributeValues: {':chartData': chart}
+            }
             var params = {
-                FunctionName: 'UpdateChart',
-                InvocationType: 'RequestResponse',
-                LogType: 'Tail',
-                Payload: JSON.stringify(chart)
+                FunctionName: 'MyUpdateData',
+                Payload: JSON.stringify(payload)
             };
 
             lambda.invoke(params, function(err, data) {
                 if(err) console.log(err, err.stack);
-                else callback(null, JSON.parse(data.Payload));
+                else callback(null, chart);
             });
         });
     });
