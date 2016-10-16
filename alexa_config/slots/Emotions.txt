@@ -4,10 +4,7 @@ confident
 reliable
 easy
 amazed
-free
 sympathetic
-interested
-satisfied
 receptive
 accepting
 kind
@@ -153,7 +150,6 @@ eager
 keen
 earnest
 intent
-anxious
 inspired
 determined
 excited
@@ -162,13 +158,9 @@ bold
 brave
 daring
 challenged
-optimistic
 re-enforced
-confident
 hopeful
 confused
-upset
-doubtful
 uncertain
 indecisive
 perplexed
@@ -219,15 +211,11 @@ quiet
 certain
 relaxed
 serene
-free and easy
 bright
 blessed
 reassured
 strong
-impulsive
-free
 sure
-certain
 rebellious
 unique
 dynamic
@@ -244,7 +232,6 @@ inferior
 vulnerable
 empty
 forced
-hesitant
 despair
 frustrated
 distressed
@@ -256,12 +243,10 @@ dominated
 sad
 tearful
 sorrowful
-pained
 grief
 anguish
 desolate
 desperate
-pessimistic
 unhappy
 lonely
 grieved

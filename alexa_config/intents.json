@@ -7,22 +7,32 @@
             "intent": "AMAZON.PauseIntent"
         },
         {
-            "intent": "HelloIntent",
-            "slots": [
-                {
-                    "name": "EmotionName",
-                    "type": "Emotion"
-                }
-            ]
-        },
-        {
-            "intent": "QuizIntent"
-        },
-        {
             "intent": "AMAZON.HelpIntent"
         },
         {
             "intent": "AMAZON.StopIntent"
+        },
+        {
+          "intent" : "LyricsIntent",
+          "slots" : [
+            {
+              "name" : "Nth",
+              "type" : "Nth"
+            },
+            {
+              "name" : "Number",
+              "type" : "Numbers"
+            }
+          ]
+        },
+        {
+            "intent": "EmotionIntent",
+            "slots": [
+                {
+                    "name": "Emotion",
+                    "type": "Emotions"
+                }
+            ]
         }
     ]
 }
