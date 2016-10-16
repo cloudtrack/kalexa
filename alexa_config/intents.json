@@ -16,12 +16,8 @@
           "intent" : "LyricsIntent",
           "slots" : [
             {
-              "name" : "Nth",
-              "type" : "Nth"
-            },
-            {
-              "name" : "Number",
-              "type" : "Numbers"
+              "name" : "number",
+              "type" : "AMAZON.NUMBER"
             }
           ]
         },

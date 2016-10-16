@@ -1,5 +1,6 @@
 LyricsIntent I want to know {Nth} song's lyrics.
-LyricsIntent I want to know the lyrics of song number {Number}
+LyricsIntent I want to know the lyrics of song number {number}
 
 EmotionIntent I feel {Emotion}
 EmotionIntent I'm {Emotion}
+
