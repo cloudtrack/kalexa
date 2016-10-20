@@ -3,7 +3,8 @@
 /**
  * Make an MP3 file reading text which was given by param,
  * Using Naver TTS API
- * @param text : Korean string to read
+ * @param text 		: Korean string to read
+ * @param fileName  : (Optional) File name to be saved in S3
  * @return the URL of an MP3 file
  *
  * MP3 file is saved in S3
@@ -55,6 +56,8 @@ exports.handler = (event, context, callback) => {
 		*/
 		var s3 = new aws.S3();
 		var fileName = new Date().getTime() + '.mp3';
+		if(event.fileName)
+			fileName = event.fileName;
 		var s3param = {Bucket: 'koreantts', Key: fileName, Body: res};
 			s3.upload(s3param, function(err, data) {
 				if (err) console.log(err, err.stack);
