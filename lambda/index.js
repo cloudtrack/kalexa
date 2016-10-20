@@ -28,6 +28,11 @@ var APP_ID = "amzn1.ask.skill.1edc6a40-ac35-4517-8ea5-7a8f0a5dca54"; //replace w
  */
 var AlexaSkill = require('./AlexaSkill');
 
+
+var aws = require('aws-sdk');
+var lambda = new aws.Lambda({
+	  region: 'us-east-1'
+});
 /**
  * Kalexa is a child of AlexaSkill.
  * To read more about inheritance in JavaScript, see the link below.
@@ -71,7 +76,74 @@ Kalexa.prototype.intentHandlers = {
     },
 	"QuizIntent" : function(intent, session, response) {
 		response.tellWithCard("Speech Output is this!", "this is card title", "this is card content");
+	},
+	"LyricsIntent" : function(intent, session, response) {
+		var nth = intent.slots.Nth.value;
+		var n;
+		if(nth) { // get n by nth slot type
+			var nth_values = [ "first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "nineth", "tenth"];
+			n = nth_values.indexOf(nth);
+			if(n == -1) {
+				var nth_values = [ "1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th", "10th"];
+				n = nth_values.indexOf(nth);
+			}
+		} else { // get n by amazon.number
+			n = intent.slots.Number.value;
+			n = n - 1;
+		}
+
+		// get songId from dynamoDB
+		var dynamodb = new aws.DynamoDB.DocumentClient();
+		var params = {
+			TableName: 'kpop_chart',
+			Key : {
+				"chart" : "realtimeChart"
+			}
+		};
+		var songId;
+		dynamodb.get(params, function(err, data) {
+			console.log('dynamoDB GET', 'err : ', err, 'data : ', data);
+			if(err) {
+				console.log(err, err.stack);
+				response.tellWithCard('Something Wrong happened');
+			} else {
+				var chart = data.Item.chartData;
+				var song = chart[n];
+				console.log(song);						
+				songId = song.songId;
+
+				var payload = {"songId" : songId};
+				console.log(payload);
+				lambda.invoke({
+					FunctionName: 'FetchLyrics',
+					Payload: JSON.stringify(payload)
+				}, function(error, data) {
+					console.log('err :', error);
+					console.log('data : ', data);
+					if(data.Payload) {
+						console.log(data.Payload);
+						response.tellWithCard('<audio src="https://s3.amazonaws.com/koreantts/vivaldi.mp3" />');
+					}
+				});	
+			}
+		});
+	},
+	"EmotionIntent" : function(intent, session, response) {
+		var payload = {"emotion" : intent.slots.Emotion.value};
+	    lambda.invoke({
+	        FunctionName: 'EmotionBasedRecommendation',
+	        Payload: JSON.stringify(payload)
+	        
+	    }, function(error, data) {
+            console.log('err :', error);
+            console.log('data : ', data);
+            if(data.Payload) {
+                console.log(data.Payload);
+                response.tellWithCard(data.Payload);
+            }
+        });
 	}
+
 };
 
 // Create the handler that responds to the Alexa Request.
