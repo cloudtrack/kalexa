@@ -18,6 +18,10 @@
             {
               "name" : "number",
               "type" : "AMAZON.NUMBER"
+            },
+            {
+              "name" : "Nth",
+              "type" : "Nth"
             }
           ]
         },
@@ -29,6 +33,9 @@
                     "type": "Emotions"
                 }
             ]
-        }
+        },
+      	{
+        	"intent": "TestIntent"
+      	}
     ]
 }
