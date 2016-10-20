@@ -139,9 +139,14 @@ Kalexa.prototype.intentHandlers = {
             console.log('data : ', data);
             if(data.Payload) {
                 console.log(data.Payload);
-                response.tellWithCard(data.Payload);
+                var speech = "<speak>" + data.Payload.replace(/\"/gi, "").replace(/\\/gi, "\"") + "</speak>";
+				var speechOutput = {
+					type : 'SSML',
+					speech : speech
+				};
+                response.tellWithCard(speechOutput);
             }
-        });
+        });	
 	}
 
 };
