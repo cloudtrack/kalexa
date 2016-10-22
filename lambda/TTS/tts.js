@@ -1,4 +1,8 @@
+process.env['PATH'] = process.env['PATH'] + ':' + process.env['LAMBDA_TASK_ROOT'];
+
 'use strict';
+
+
 
 /**
  * Make an MP3 file reading text which was given by param,
@@ -14,6 +18,7 @@ const https = require('https');
 const querystring = require('querystring');
 const aws = require('aws-sdk');
 const fs = require('fs');
+const cp = require('child_process');
 
 exports.handler = (event, context, callback) => {
     var options = {
@@ -32,44 +37,54 @@ exports.handler = (event, context, callback) => {
         'speed': '0', // -5x ~ 5x
         'text': event.text,
     });
-    const req = https.request(options, (res) => {
-		/* there is no example upload res to s3 directly
-		 * using example https code didn't work. body is different from mp3
-		 * I tried download using res.pipe(fs.createWriteStream ... )
-		 * saving it to /tmp/, reading it again, and uploading to S3 works.
-		 * but simply to toss res to s3 works.
-		 */
 
-        /*let body = '';
-        res.on('data', (chunk) => body += chunk);
-        res.on('end', () => {
-            console.log('Successfully processed HTTPS response');
-			var s3 = new aws.S3();
-			var s3param = {Bucket: 'koreantts', Key: 'test.mp3', Body: body};
-			s3.upload(s3param, function(err, data) {
-				if (err) console.log(err, err.stack);
-				else console.log(data);
-				callback(null, "dd");
-				context.done();
-			});
-		});
-		*/
-		var s3 = new aws.S3();
-		var fileName = new Date().getTime() + '.mp3';
-		if(event.fileName)
-			fileName = event.fileName;
-		var s3param = {Bucket: 'koreantts', Key: fileName, Body: res};
-			s3.upload(s3param, function(err, data) {
-				if (err) console.log(err, err.stack);
-				else console.log(data);
-				callback(null, 'https://s3.amazonaws.com/koreantts/' + fileName);
-				context.done();
-			});
+	cp.exec(
+		'cp /var/task/ffmpeg /tmp/.; chmod 755 /tmp/ffmpeg;',
+		function(error, stdout, stderr) {
+			if(error) {
+				console.log('loading ffmpeg error');
+			} else {
+				console.log('loading ffmpeg');
+				console.log('stdout : ' + stdout);
+				console.log('stderr : ' + stderr);
+				const req = https.request(options, (res) => {
+					var s3 = new aws.S3();
+					var temp = fs.createWriteStream('/tmp/temp.mp3');
+					res.pipe(temp);
 
-    });
-    req.on('error', callback);
-    req.write(data);
-	req.end();
+					var fileName = new Date().getTime() + '.mp3';
+					if(event.fileName)
+						fileName = event.fileName;
+					var filePath = "/tmp/" + fileName;
+
+					cp.exec(
+						'/tmp/ffmpeg -i /tmp/temp.mp3 -ac 2 -codec:a libmp3lame -b:a 48k -ar 16000 ' + filePath,
+						function(error, stdout, stderr) {
+							if(error) {
+								console.log('executing ffmpeg error');
+							} else {
+								console.log('executing ffmpeg');
+								console.log('stdout : ' + stdout);
+								console.log('stderr : ' + stderr);
+								var file = fs.createReadStream(filePath);
+								var s3param = {Bucket: 'koreantts', Key: fileName, Body: file};
+								s3.upload(s3param, function(err, data) {
+									if (err) console.log(err, err.stack);
+									else console.log(data);
+									callback(null, 'https://s3.amazonaws.com/koreantts/' + fileName);
+									context.done();
+								});
+							}
+						}
+					);
+				});
+				req.on('error', callback);
+				req.write(data);
+				req.end();
+
+			}
+		}
+	);
 
 };
 
