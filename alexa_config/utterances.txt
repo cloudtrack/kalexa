@@ -1,10 +1,17 @@
 LyricsIntent I want to know {Nth} song's lyrics.
+LyricsIntent What's the lyrics of {Nth} song
+LyricsIntent What is the lyrics of {Nth} song
+LyricsIntent tell me the lyrics of {Nth} song.
 LyricsIntent I want to know the lyrics of song number {number}
+LyricsIntent what's the lyrics of song number {number}
+LyricsIntent what is the lyrics of song number {number}
+LyricsIntent tell me the lyrics of song number {number}
+LyricsIntent I want to know this song's lyrics.
+LyricsIntent what is this song's lyrics
+LyricsIntent tell me the lyrics of this song.
+
 
 EmotionIntent I feel {Emotion}
 EmotionIntent I'm {Emotion}
+EmotionIntent I am {Emotion}
 
-ChartIntent I want to know the chart.
-ChartIntent I want to know popular K-pop songs.
-ChartIntent Let me know the chart.
-ChartIntent Let me know know popular K-pop songs.
