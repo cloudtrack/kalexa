@@ -4,3 +4,7 @@ LyricsIntent I want to know the lyrics of song number {number}
 EmotionIntent I feel {Emotion}
 EmotionIntent I'm {Emotion}
 
+ChartIntent I want to know the chart.
+ChartIntent I want to know popular K-pop songs.
+ChartIntent Let me know the chart.
+ChartIntent Let me know know popular K-pop songs.
