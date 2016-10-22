@@ -23,7 +23,6 @@ exports.handler = function(event, context, callback) {
 
 	db.get(params, function(err, data) {
 		console.log('dynamoDB GET', 'err : ', err, 'data : ', data);
-		console.log(data.length);
 		if(err || Object.keys(data).length === 0) { // db get error occured or no saved data, then call lambda
 			var url = 'http://www.melon.com/song/detail.htm?songId=' + songId;
 			request(url, function(error, response, html) { // get lyrics
