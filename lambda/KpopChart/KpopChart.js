@@ -40,14 +40,14 @@ exports.handler = (event, context, callback) => {
  *  chart = [{songId, songName, artists}, ...]
  *  artists: [{artistId, artistName}, ...]
  */
-            var chart = new Array();
+            var chart = [];
             for(var i=0; i<10; i++){
                 var src = body.melon.songs.song[i];
                 var artistsNum = src.artists.artist.length;
                 chart[i] = {};
                 chart[i].songId = src.songId;
                 chart[i].songName = src.songName;
-                chart[i].artists = new Array();
+                chart[i].artists = [];
                 for(var j=0; j<artistsNum; j++){
                     chart[i].artists[j] = {};
                     chart[i].artists[j].artistId = src.artists.artist[j].artistId;
@@ -56,22 +56,21 @@ exports.handler = (event, context, callback) => {
             }
 
             //update chart data
-            var lambda = new aws.Lambda();
-            var payload = {
-                tableName: 'kpop_chart',
-                key: {'chart': 'realtimeChart'},
-                updateExpression: 'set chartData = :chartData',
-                expressionAttributeValues: {':chartData': chart}
-            }
+            var dynamodb = new aws.DynamoDB.DocumentClient();
             var params = {
-                FunctionName: 'MyUpdateData',
-                Payload: JSON.stringify(payload)
+              TableName: 'kpop_chart',
+              Key: {'chart': 'realtimeChart'},
+              UpdateExpression: 'set chartData = :chartData',
+              ExpressionAttributeValues: {':chartData': chart},
+              ReturnValues: 'UPDATED_NEW'
             };
-
-            lambda.invoke(params, function(err, data) {
+            dynamodb.update(params, function(err, data) {
                 if(err) console.log(err, err.stack);
-                else callback(null, chart);
-            });
+                else {
+                    console.log(data);
+                    callback(null, chart);
+                }
+            })
         });
     });
 
