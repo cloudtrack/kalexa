@@ -36,6 +36,9 @@
         },
       	{
         	"intent": "TestIntent"
-      	}
+      	},
+        {
+            "intent": "ChartIntent"
+        }
     ]
 }
