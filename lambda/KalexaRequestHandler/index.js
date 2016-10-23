@@ -107,7 +107,7 @@ Kalexa.prototype.intentHandlers = {
 						FunctionName: 'PlayLyrics',
 						Payload: JSON.stringify(payload)
 					}, function(error, data) {
-						if(err) { // error
+						if(error) { // error
 							console.log('err :', error);
 							response.tellWithCard('error occured');
 						} else { //
@@ -165,7 +165,7 @@ Kalexa.prototype.intentHandlers = {
 						FunctionName: 'PlayLyrics',
 						Payload: JSON.stringify(payload)
 					}, function(error, data) {
-						if(err) { // error
+						if(error) { // error
 							console.log('err :', error);
 							response.tellWithCard('error occured');
 						} else { //
