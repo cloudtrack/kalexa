@@ -27,3 +27,5 @@ ChartIntent I want to know know {Nth} song's artist.
 ChartIntent Let me know {Nth} song's artist.
 ChartIntent Who is the {Nth} song's artist.
 ChartIntent Who is {Nth} song's artist.
+
+OtherSongIntent I want to know other song of {Nth} artist
