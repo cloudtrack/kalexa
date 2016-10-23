@@ -22,7 +22,7 @@ exports.handler = function(event, context, callback) {
 	var emotion = event.emotion;
 	console.log(emotion);
 	var emotionCategory;
-	Object.keys(emotions).forEach(function(key) {
+	Object.keys(emotions).forEach(function(key) { // get emotion category
 		var list = emotions[key];
 		if(list.indexOf(emotion) > -1) {
 			emotionCategory = key;
@@ -31,12 +31,29 @@ exports.handler = function(event, context, callback) {
 		}
 	});
 
-	console.log(emotionCategory);
+	var songs = recommendations[emotionCategory]; // get recommendations fot emotion
+	var songId = songs[Math.floor(Math.random()*songs.length)]; // get random song
 
-	var songs = recommendations[emotionCategory];
-	var song = songs[Math.floor(Math.random()*songs.length)];
-	console.log(song);
-	context.succeed('<audio src="'+S3_PREFIX + song + '.mp3'+ '"/>');
+	var db = new aws.DynamoDB.DocumentClient();
+	var params = {
+		TableName: 'kpop_songs',
+		Key : {
+			type : 'latest'
+		},
+		UpdateExpression : "set songId = :songId",
+		ExpressionAttributeValues : {
+			":songId" : songId
+		}
+	};
+
+	db.update(params, function(err, data) {
+		if(err) {
+			console.log('db update error :', err);
+		} else {
+			console.log("Updated item:", data);
+		}
+		context.succeed('<audio src="'+S3_PREFIX + songId+ '.mp3'+ '"/>');
+	});
 }
 
 //exports.handler();

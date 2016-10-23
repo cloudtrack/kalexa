@@ -79,54 +79,109 @@ Kalexa.prototype.intentHandlers = {
 	},
 	"LyricsIntent" : function(intent, session, response) {
 		var nth = intent.slots.Nth.value;
-		var n;
-		if(nth) { // get n by nth slot type
-			var nth_values = [ "first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "nineth", "tenth"];
-			n = nth_values.indexOf(nth);
-			if(n == -1) {
-				var nth_values = [ "1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th", "10th"];
-				n = nth_values.indexOf(nth);
-			}
-		} else { // get n by amazon.number
-			n = intent.slots.Number.value;
-			n = n - 1;
-		}
-
-		// get songId from dynamoDB
-		var dynamodb = new aws.DynamoDB.DocumentClient();
-		var params = {
-			TableName: 'kpop_chart',
-			Key : {
-				"chart" : "realtimeChart"
-			}
-		};
+		var number = intent.slots.number.value;
 		var songId;
-		dynamodb.get(params, function(err, data) {
-			console.log('dynamoDB GET', 'err : ', err, 'data : ', data);
-			if(err) {
-				console.log(err, err.stack);
-				response.tellWithCard('Something Wrong happened');
-			} else {
-				var chart = data.Item.chartData;
-				var song = chart[n];
-				console.log(song);						
-				songId = song.songId;
+		if(!nth && !number) { // get last played song
+			console.log("latest song's lyrics");
+			var dynamodb = new aws.DynamoDB.DocumentClient();
+			var params = {
+				TableName: 'kpop_songs',
+				Key : {
+					"type" : "latest"
+				}
+			};
 
-				var payload = {"songId" : songId};
-				console.log(payload);
-				lambda.invoke({
-					FunctionName: 'FetchLyrics',
-					Payload: JSON.stringify(payload)
-				}, function(error, data) {
-					console.log('err :', error);
+			dynamodb.get(params, function(err, data) {
+				if(err) {
+					console.log('err : ', err);
+					response.tellWithCard('error occured');
+				} else {
 					console.log('data : ', data);
-					if(data.Payload) {
-						console.log(data.Payload);
-						response.tellWithCard('<audio src="https://s3.amazonaws.com/koreantts/vivaldi.mp3" />');
-					}
-				});	
+					songId = data.Item.songId;
+
+					// call lambda
+					var payload = {"songId" : songId};
+					console.log(payload);
+
+					lambda.invoke({
+						FunctionName: 'PlayLyrics',
+						Payload: JSON.stringify(payload)
+					}, function(error, data) {
+						if(err) { // error
+							console.log('err :', error);
+							response.tellWithCard('error occured');
+						} else { // 
+							console.log('data : ', data);
+							var url = data.Payload;
+							var speech = "<speak>" + url.replace(/\"/gi, "").replace(/\\/gi, "\"") + "</speak>";
+							var speechOutput = {
+								type : 'SSML',
+								speech : speech
+							};
+							response.tellWithCard(speechOutput);
+						}
+					});	
+				}
+			});
+		} else {
+			console.log("get lyrics by number");
+			var n;
+			if(nth) { // get n by nth slot type
+				var nth_values = [ "first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "nineth", "tenth"];
+				n = nth_values.indexOf(nth);
+				if(n == -1) {
+					var nth_values = [ "1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th", "10th"];
+					n = nth_values.indexOf(nth);
+				}
+			} else { // get n by amazon.number
+				n = intent.slots.Number.value;
+				n = n - 1;
 			}
-		});
+
+			// get songId from dynamoDB
+			var dynamodb = new aws.DynamoDB.DocumentClient();
+			var params = {
+				TableName: 'kpop_chart',
+				Key : {
+					"chart" : "realtimeChart"
+				}
+			};
+			var songId;
+			dynamodb.get(params, function(err, data) {
+				console.log('dynamoDB GET', 'err : ', err, 'data : ', data);
+				if(err) {
+					console.log(err, err.stack);
+					response.tellWithCard('Error occured');
+				} else {
+					var chart = data.Item.chartData;
+					var song = chart[n];
+					console.log(song);						
+					songId = song.songId;
+
+					// call lambda
+					var payload = {"songId" : songId};
+					console.log(payload);
+					lambda.invoke({
+						FunctionName: 'PlayLyrics',
+						Payload: JSON.stringify(payload)
+					}, function(error, data) {
+						if(err) { // error
+							console.log('err :', error);
+							response.tellWithCard('error occured');
+						} else { // 
+							console.log('data : ', data);
+							var url = data.Payload;
+							var speech = "<speak>" + url.replace(/\"/gi, "").replace(/\\/gi, "\"") + "</speak>";
+							var speechOutput = {
+								type : 'SSML',
+								speech : speech
+							};
+							response.tellWithCard(speechOutput);
+						}
+					});	
+				}
+			});
+		}
 	},
 	"EmotionIntent" : function(intent, session, response) {
 		var payload = {"emotion" : intent.slots.Emotion.value};
@@ -135,17 +190,21 @@ Kalexa.prototype.intentHandlers = {
 	        Payload: JSON.stringify(payload)
 	        
 	    }, function(error, data) {
-            console.log('err :', error);
-            console.log('data : ', data);
-            if(data.Payload) {
-                console.log(data.Payload);
-                var speech = "<speak>" + data.Payload.replace(/\"/gi, "").replace(/\\/gi, "\"") + "</speak>";
-				var speechOutput = {
-					type : 'SSML',
-					speech : speech
-				};
-                response.tellWithCard(speechOutput);
-            }
+			if(error) {
+				console.log('err :', error);
+				response.tellWithCard('error occured');
+			} else {
+				console.log('data : ', data);
+				if(data.Payload) {
+					console.log(data.Payload);
+					var speech = "<speak>" + data.Payload.replace(/\"/gi, "").replace(/\\/gi, "\"") + "</speak>";
+					var speechOutput = {
+						type : 'SSML',
+						speech : speech
+					};
+					response.tellWithCard(speechOutput);
+				}
+			}
         });	
 	}
 
