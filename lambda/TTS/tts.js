@@ -25,7 +25,12 @@ const DEFAULT_PATH = '/tmp/';
 function uploadAndClean(tempName, fileName, callback) {
 	var s3 = new aws.S3();
 	var file = fs.createReadStream(DEFAULT_PATH + fileName);
-	var s3param = {Bucket: 'koreantts', Key: fileName, Body: file};
+	var s3param = {
+		Bucket: 'koreantts',
+		Key: fileName,
+		Body: file,
+		ACL: 'public-read'
+	};
 	s3.upload(s3param, function(err, data) {
 		if (err) console.log('S3 upload error : ' + err, err.stack);
 		else console.log('S3 upload succeed : ' + data);
@@ -44,8 +49,10 @@ function uploadAndClean(tempName, fileName, callback) {
 
 function convertMP3(tempName, fileName, callbackAfterUpload) {
 	cp.exec(
-		DEFAULT_PATH + 'ffmpeg -analyzeduration 10000000 -probesize 100000000 -i ' + DEFAULT_PATH
-		+ tempName + ' -ac 2 -codec:a libmp3lame -b:a 48k -ar 16000 ' + DEFAULT_PATH + fileName,
+		DEFAULT_PATH + 'ffmpeg -i ' + DEFAULT_PATH + tempName
+		+ ' -analyzeduration 10000000 -probesize 100000000 '
+		+ ' -ac 2 -codec:a libmp3lame -b:a 48k -ar 16000 -ss 00:00:00 -t 00:01:25 '
+		+ DEFAULT_PATH + fileName,
 		function(error, stdout, stderr) {
 			if(error) {
 				console.log('executing ffmpeg error : RETRY');
