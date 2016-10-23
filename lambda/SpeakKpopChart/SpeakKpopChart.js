@@ -1,7 +1,7 @@
 /**
- *
+ * upload mp3 files about K-pop chart that are not in S3 yet
  * @param .
- * @return upload mp3 files about K-pop chart that are not in S3 yet
+ * @return chart data
  */
 
 const aws = require('aws-sdk');
@@ -55,6 +55,7 @@ exports.handler = (event, context, callback) => {
                     makeAudioFile(params, artistFileName);
                 }
             }
+            callback(null, chart);
         }
     });
 };

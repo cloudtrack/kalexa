@@ -2,7 +2,7 @@
 
 /**
  * Get other songs of the artist, using Melon API
- * @param {artistName, songId}
+ * @param {artistId, artistName, songId}
  * @return list of 5 other songs
  */
 
@@ -38,15 +38,16 @@ exports.handler = (event, context, callback) => {
             console.log('Successfully processed HTTPS response');
             body = JSON.parse(body);
 
-            var songs = new Array();
+            var songs = [];
             var i = 0;
             for(var n=0; n<6; n++){
                 var src = body.melon.songs.song[n];
                 if(event.songId != src.songId){
-                    var artistsNum = src.artists.artist.length;
                     songs[i] = {};
                     songs[i].songId = src.songId;
                     songs[i].songName = src.songName;
+                    songs[i].artistName = event.artistName;
+                    songs[i].artistId = event.artistId;
                     i++;
                 }
                 if(i == 5)
