@@ -53,7 +53,7 @@ exports.handler = function(event, context, callback) {
 					} 
 					console.log('data : ', data);
 					if(data.Payload) {
-						var url = data.Payload;
+						var url = data.Payload.replace(/"/gi, "");
 						var params = {
 							TableName : db_table,
 							Item : {
