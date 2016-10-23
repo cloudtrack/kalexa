@@ -52,7 +52,7 @@ exports.handler = function(event, context, callback) {
 		} else {
 			console.log("Updated item:", data);
 		}
-		context.succeed('<audio src="'+S3_PREFIX + songId+ '.mp3'+ '"/>');
+		context.succeed(S3_PREFIX + songId+ '.mp3');
 	});
 }
 

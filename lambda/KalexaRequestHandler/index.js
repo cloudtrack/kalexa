@@ -112,8 +112,8 @@ Kalexa.prototype.intentHandlers = {
 							response.tellWithCard('error occured');
 						} else { // 
 							console.log('data : ', data);
-							var url = data.Payload;
-							var speech = "<speak>" + url.replace(/\"/gi, "").replace(/\\/gi, "\"") + "</speak>";
+							var url = data.Payload.replace(/"/gi, "");
+							var speech = '<speak><audio src="' + url + '"/></speak>';
 							var speechOutput = {
 								type : 'SSML',
 								speech : speech
@@ -170,8 +170,8 @@ Kalexa.prototype.intentHandlers = {
 							response.tellWithCard('error occured');
 						} else { // 
 							console.log('data : ', data);
-							var url = data.Payload;
-							var speech = "<speak>" + url.replace(/\"/gi, "").replace(/\\/gi, "\"") + "</speak>";
+							var url = data.Payload.replace(/"/gi, "");
+							var speech = '<speak><audio src="' + url + '"/></speak>';
 							var speechOutput = {
 								type : 'SSML',
 								speech : speech
@@ -197,7 +197,8 @@ Kalexa.prototype.intentHandlers = {
 				console.log('data : ', data);
 				if(data.Payload) {
 					console.log(data.Payload);
-					var speech = "<speak>" + data.Payload.replace(/\"/gi, "").replace(/\\/gi, "\"") + "</speak>";
+					var url = data.Payload.replace(/"/gi, "");
+					var speech = "<speak><audio src=\"" + url +  "\"/></speak>";
 					var speechOutput = {
 						type : 'SSML',
 						speech : speech
