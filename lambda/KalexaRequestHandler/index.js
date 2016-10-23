@@ -295,6 +295,52 @@ Kalexa.prototype.intentHandlers = {
 				}
 			}
 		});
+	},
+	"OtherSongIntent" : function(intent, session, response) {
+		var nth = intent.slots.Nth.value;
+		var n;
+		if(nth) { // get n by nth slot type
+			var nth_values = [ "first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "nineth", "tenth"];
+			n = nth_values.indexOf(nth);
+			if(n == -1) {
+				var nth_values = [ "1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th", "10th"];
+				n = nth_values.indexOf(nth);
+			}
+		}
+		var payload = {nth : n};
+	    lambda.invoke({
+    		FunctionName: 'ArtistBasedRecommendation',
+    		Payload: JSON.stringify(payload)
+    	}, function(err, data) {
+			if(err){
+    			console.log(err, err.stack);
+	    		response.tellWithCard('Something Wrong happened');
+			} else {
+				console.log('complete to upload new mp3 files into S3');
+    			var songs = JSON.parse(data.Payload);
+    		    var rank = ["first", "second", "third", "fourth", "fifth"];
+				var songsNum = songs.length;
+				var speechOutput = '';
+				var artistId = songs[0].artistId;
+				var url = "https://s3.amazonaws.com/koreantts/" + artistId + "1.mp3";
+				var artistText = "<audio src=\"" + url + "\"/>";
+
+				if(songsNum == 0){
+					speechOutput = '<speak>there isn\'t any other song of the artist ' + artistText + '</speak>';
+					response.tellWithCard({type: 'SSML', speech: speechOutput});
+				} else {
+		        	speechOutput = '<speak>I recommend some songs of singer ' + artistText;
+					for(var i=0; i<songsNum; i++) {
+						var songId = songs[i].songId;
+						var url = "https://s3.amazonaws.com/koreantts/" + songId + "1.mp3";
+						var songText = "<audio src=\"" + url + "\"/>";
+						speechOutput += ' ' + rank[i] + ' song is ' + songText;
+					}
+	    			speechOutput += '</speak>';
+		    		response.tellWithCard({type: 'SSML', speech: speechOutput});
+				}
+			}
+	    });
 	}
 };
 
