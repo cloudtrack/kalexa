@@ -1,7 +1,7 @@
 /**
  * upload mp3 files about name of other songs that are not in S3 yet
  * @param {nth}
- * @return list of 5 other songs
+ * @return list of 4 other songs (if the number of song is less than 4, return as much as the number of song)
  */
 
 const aws = require('aws-sdk');
@@ -33,7 +33,12 @@ exports.handler = (event, context, callback) => {
             }, function(err, data) {
                 if(err) console.log(err, err.stack);
                 else {
-                    var songs = data.Payload;
+                    var songs = JSON.parse(data.Payload);
+                    var temp = songs[0].artistName;
+                    var idx = temp.indexOf("(");
+                    if(idx != -1){
+                    songs[0].artistName = temp.substring(0,idx-1);
+                    }
                     var artistFileName = JSON.stringify(songs[0].artistId) + '1.mp3';
                     var payload = {
                         text: songs[0].artistName,
@@ -45,11 +50,17 @@ exports.handler = (event, context, callback) => {
                     };
                     makeAudioFile(params, artistFileName);
                     for(var i=0; i<songs.length; i++){
-                        var songFileName = JSON.stringify(songs[i].songId) + '1.mp3';
+                        temp = songs[i].songName;
+                        idx = temp.indexOf("(");
+                        if(idx != -1){
+                            songs[i].songName = temp.substring(0,idx-1);
+                        }
+                        var songFileName = songs[i].songId + '1.mp3';
                         payload = {
                             text: songs[i].songName,
                             fileName: songFileName
                         };
+                        console.log('fileName: ' + songFileName);
                         params = {
                             FunctionName: 'TTS',
                             Payload: JSON.stringify(payload)
