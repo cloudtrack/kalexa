@@ -38,7 +38,17 @@
         	"intent": "TestIntent"
       	},
         {
-            "intent": "ChartIntent"
+          	"intent" : "ChartIntent",
+          	"slots" : [
+            {
+              "name" : "Nth",
+              "type" : "Nth"
+            },
+            {
+              "name" : "fromSixth",
+              "type" : "fromSixth"
+            }
+          ]
         }
     ]
 }
