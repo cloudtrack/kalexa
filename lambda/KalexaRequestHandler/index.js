@@ -215,6 +215,86 @@ Kalexa.prototype.intentHandlers = {
 			speech : mp3URL
 		};
 		response.tellWithCard(speechOutput);
+	},
+	"ChartIntent" : function(intent, session, response) {
+		var nth = intent.slots.Nth.value;
+		var fromSixth = intent.slots.fromSixth.value;
+		var n;
+		if(nth) { // get n by nth slot type
+			var nth_values = [ "first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "nineth", "tenth"];
+			n = nth_values.indexOf(nth);
+			if(n == -1) {
+				var nth_values = [ "1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th", "10th"];
+				n = nth_values.indexOf(nth);
+			}
+		}
+		lambda.invoke({
+			FunctionName: 'SpeakKpopChart',
+			Payload: ''
+		}, function(err, data) {
+			if(err){
+				console.log(err, err.stack);
+				response.tellWithCard('Something Wrong happened');
+			} else {
+				console.log('complete to upload new mp3 files into S3');
+				var chart = JSON.parse(data.Payload);
+				var rank = ["first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "nineth", "tenth"];
+				if(fromSixth){
+					console.log('from sixth');
+					var speechOutput = '<speak>I will let you know sixth to tenth rank of K-pop songs.';
+					var rank = ["first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "nineth", "tenth"];
+					for(var i=5; i<10; i++) {
+						var songId = chart[i].songId;
+						var url = "https://s3.amazonaws.com/koreantts/" + songId + "1.mp3";
+						var songText = "<audio src=\"" + url + "\"/>";
+						speechOutput += ' ' + rank[i] + ' song is ' + songText;
+					}
+					speechOutput += '. if you want to know the artist of the song, say like who is first song\'s artist</speak>'
+					response.tellWithCard({type: 'SSML', speech: speechOutput});
+				}
+				else if(!nth){
+					console.log('first to fifth');
+					var speechOutput = '<speak>I will let you know first to fifth rank of K-pop songs.';
+					for(var i=0; i<5; i++) {
+						var songId = chart[i].songId;
+						var url = "https://s3.amazonaws.com/koreantts/" + songId + "1.mp3";
+						var songText = "<audio src=\"" + url + "\"/>";
+						speechOutput += ' ' + rank[i] + ' song is ' + songText;
+					}
+					speechOutput += '. if you want to know sixth to tenth rank of songs, say like let me know chart from sixth rank</speak>'
+					response.tellWithCard({type: 'SSML', speech: speechOutput});
+				}
+				else{
+					console.log('speak artist');
+					var speechOutput = '<speak>I will let you know artist of ' + rank[n] + ' placed song. ';
+					var songId = chart[n].songId;
+					var url = "https://s3.amazonaws.com/koreantts/" + songId + "1.mp3";
+					var songText = "<audio src=\"" + url + "\"/>";
+					speechOutput += 'name of song is ' + songText;
+
+					var artistNum = chart[n].artists.length;
+					if(artistNum == 1){
+						var artistId = chart[n].artists[0].artistId;
+						var url = "https://s3.amazonaws.com/koreantts/" + artistId + "1.mp3";
+						var artistText = "<audio src=\"" + url + "\"/>";
+						speechOutput += ' artist is ' + artistText;
+					} else {
+						var artistId = chart[n].artists[0].artistId;
+						var url = "https://s3.amazonaws.com/koreantts/" + artistId + "1.mp3";
+						var artistText = "<audio src=\"" + url + "\"/>";
+						speechOutput += ' artists are ' + artistText;
+						for(var j=1; j<artistNum; j++) {
+							artistsId = chart[n].artists[j].artistId;
+							var url = "https://s3.amazonaws.com/koreantts/" + artistId + "1.mp3";
+							var artistText = "<audio src=\"" + url + "\"/>";
+							speechOutput += ' and ' + artistText;
+						}
+					}
+					speechOutput += '</speak>'
+					response.tellWithCard({type: 'SSML', speech: speechOutput});
+				}
+			}
+		});
 	}
 };
 
@@ -224,4 +304,3 @@ exports.handler = function (event, context) {
     var kalexa = new Kalexa();
     kalexa.execute(event, context);
 };
-
