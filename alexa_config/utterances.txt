@@ -15,3 +15,15 @@ EmotionIntent I feel {Emotion}
 EmotionIntent I'm {Emotion}
 EmotionIntent I am {Emotion}
 
+ChartIntent I want to know the chart.
+ChartIntent I want to know popular K-pop songs.
+ChartIntent Let me know the chart.
+ChartIntent Let me know know popular K-pop songs.
+ChartIntent I want to know the chart {fromSixth} rank.
+ChartIntent I want to know popular K-pop songs {fromSixth} rank.
+ChartIntent Let me know the chart {fromSixth} rank.
+ChartIntent Let me know know popular K-pop songs {fromSixth} rank.
+ChartIntent I want to know know {Nth} song's artist.
+ChartIntent Let me know {Nth} song's artist.
+ChartIntent Who is the {Nth} song's artist.
+ChartIntent Who is {Nth} song's artist.
