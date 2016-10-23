@@ -110,7 +110,7 @@ Kalexa.prototype.intentHandlers = {
 						if(err) { // error
 							console.log('err :', error);
 							response.tellWithCard('error occured');
-						} else { // 
+						} else { //
 							console.log('data : ', data);
 							var url = data.Payload.replace(/"/gi, "");
 							var speech = '<speak><audio src="' + url + '"/></speak>';
@@ -120,7 +120,7 @@ Kalexa.prototype.intentHandlers = {
 							};
 							response.tellWithCard(speechOutput);
 						}
-					});	
+					});
 				}
 			});
 		} else {
@@ -155,7 +155,7 @@ Kalexa.prototype.intentHandlers = {
 				} else {
 					var chart = data.Item.chartData;
 					var song = chart[n];
-					console.log(song);						
+					console.log(song);
 					songId = song.songId;
 
 					// call lambda
@@ -168,7 +168,7 @@ Kalexa.prototype.intentHandlers = {
 						if(err) { // error
 							console.log('err :', error);
 							response.tellWithCard('error occured');
-						} else { // 
+						} else { //
 							console.log('data : ', data);
 							var url = data.Payload.replace(/"/gi, "");
 							var speech = '<speak><audio src="' + url + '"/></speak>';
@@ -178,7 +178,7 @@ Kalexa.prototype.intentHandlers = {
 							};
 							response.tellWithCard(speechOutput);
 						}
-					});	
+					});
 				}
 			});
 		}
@@ -188,7 +188,7 @@ Kalexa.prototype.intentHandlers = {
 	    lambda.invoke({
 	        FunctionName: 'EmotionBasedRecommendation',
 	        Payload: JSON.stringify(payload)
-	        
+
 	    }, function(error, data) {
 			if(error) {
 				console.log('err :', error);
@@ -206,9 +206,16 @@ Kalexa.prototype.intentHandlers = {
 					response.tellWithCard(speechOutput);
 				}
 			}
-        });	
+        });
+	},
+	"TestIntent" : function(intent, session, response) {
+		var mp3URL = '<speak><audio src=\"https://s3.amazonaws.com/koreantts/ff.mp3\"/></speak>';
+		var speechOutput = {
+			type : 'SSML',
+			speech : mp3URL
+		};
+		response.tellWithCard(speechOutput);
 	}
-
 };
 
 // Create the handler that responds to the Alexa Request.
