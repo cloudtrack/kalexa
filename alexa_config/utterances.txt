@@ -10,7 +10,6 @@ LyricsIntent I want to know this song's lyrics.
 LyricsIntent what is this song's lyrics
 LyricsIntent tell me the lyrics of this song.
 
-
 EmotionIntent I feel {Emotion}
 EmotionIntent I'm {Emotion}
 EmotionIntent I am {Emotion}
@@ -29,3 +28,5 @@ ChartIntent Who is the {Nth} song's artist.
 ChartIntent Who is {Nth} song's artist.
 
 OtherSongIntent I want to know other song of {Nth} artist
+
+TestIntent Execute test.
