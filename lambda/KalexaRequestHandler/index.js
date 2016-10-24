@@ -360,6 +360,96 @@ Kalexa.prototype.intentHandlers = {
 				}
 			}
 	    });
+	},
+	"PlaySongIntent" : function(intent, session, response) {
+        var nth = intent.slots.Nth.value;
+        var notInChart = intent.slots.NotinChart.value;
+        var dynamodb = new aws.DynamoDB.DocumentClient();
+
+		if(nth) {
+			var nth_values = [ "first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "nineth", "tenth"];
+			var n = nth_values.indexOf(nth);
+			if(n == -1) {
+				var nth_values = [ "1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th", "10th"];
+				n = nth_values.indexOf(nth);
+			}
+            var params = {
+                TableName: 'kpop_chart',
+                Key : {
+                    "chart" : "realtimeChart"
+                }
+            };
+            dynamodb.get(params, function(err, data) {
+                console.log('dynamoDB GET', 'err : ', err, 'data : ', data);
+                if(err) {
+                    console.log(err, err.stack);
+                    response.tellWithCard('Error occured');
+                } else {
+                    var chart = data.Item.chartData;
+					var song = chart[n];
+					var songId = song.songId;
+					if(!notInChart){//play song in the chart
+						var params = {
+							TableName: 'kpop_songs',
+							Key : {
+								type : 'latest'
+							},
+							UpdateExpression : "set songId = :songId",
+							ExpressionAttributeValues : {
+								":songId" : songId
+							}
+						};
+						dynamodb.update(params, function(err, data) {
+							if(err) {
+								console.log('db update error :', err);
+								response.tellWithCard('Error occured');
+							} else {
+								var url = "https://s3.amazonaws.com/kpopmusic/" + songId + ".mp3";
+								var songText = "<speak><audio src=\"" + url + "\"/></speak>";
+								response.tellWithCard({type: 'SSML', speech: songText});
+							}
+						});
+					}
+					else{//play song not in the chart, the song is other song of artist in the chart
+						var payload = {
+			                artistId: song.artists[0].artistId,
+			                artistName: song.artists[0].artistName,
+			                songId: song.songId
+			            };
+						lambda.invoke({
+			                FunctionName: 'GetOtherSongs',
+			                Payload: JSON.stringify(payload)
+			            }, function(err, data) {
+			                if(err) console.log(err, err.stack);
+			                else {
+								var songs = JSON.parse(data.Payload);
+								var songId = songs[0].songId;
+								var params = {
+									TableName: 'kpop_songs',
+									Key : {
+										type : 'latest'
+									},
+									UpdateExpression : "set songId = :songId",
+									ExpressionAttributeValues : {
+										":songId" : songId
+									}
+								};
+								dynamodb.update(params, function(err, data) {
+									if(err) {
+										console.log('db update error :', err);
+										response.tellWithCard('Error occured');
+									} else {
+										var url = "https://s3.amazonaws.com/kpopmusic/" + songId + ".mp3";
+										var songText = "<speak><audio src=\"" + url + "\"/></speak>";
+										response.tellWithCard({type: 'SSML', speech: songText});
+									}
+								});
+			                }
+						});
+                	}
+				}
+            });
+		}
 	}
 };
 
