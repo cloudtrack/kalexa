@@ -30,5 +30,8 @@ ChartIntent Who is {Nth} song's artist.
 OtherSongIntent I want to know other song of {Nth} artist
 
 TranslateIntent What is {Sentence} in Korean
+TranslateIntent Translate {Sentence}
+TranslateIntent Translate {Sentence} into Korean
+TranslateIntent How can I say {Sentence} in Korean
 
 TestIntent Execute test.
