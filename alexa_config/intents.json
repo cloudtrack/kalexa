@@ -67,6 +67,19 @@
             	  "type" : "Nth"
             	}
         	  ]
+        },
+        {
+          	"intent" : "PlaySongIntent",
+          	"slots" : [
+      	      	{
+        	      "name" : "Nth",
+            	  "type" : "Nth"
+            	},
+              	{
+                  "name" : "NotinChart",
+                  "type" : "NotinChart"
+                }
+        	  ]
         }
     ]
 }
