@@ -29,4 +29,6 @@ ChartIntent Who is {Nth} song's artist.
 
 OtherSongIntent I want to know other song of {Nth} artist
 
+TranslateIntent What is {Sentence} in Korean
+
 TestIntent Execute test.

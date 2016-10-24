@@ -37,6 +37,15 @@
       	{
         	"intent": "TestIntent"
       	},
+		{
+			"intent": "TranslateIntent",
+			"slots": [
+				{
+					"name": "Sentence",
+					"type": "Sentences"
+				}
+			]
+		},
         {
           	"intent" : "ChartIntent",
           	"slots" : [

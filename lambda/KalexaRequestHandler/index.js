@@ -216,6 +216,25 @@ Kalexa.prototype.intentHandlers = {
 		};
 		response.tellWithCard(speechOutput);
 	},
+	"TranslateIntent" : function(intent, session, response) {
+		var text = intent.slots.Sentence.value;
+		var payload = {"text": text};
+		lambda.invoke({
+			FunctionName: 'TranslateWrapper',
+			Payload: JSON.stringify(payload)
+		}, function(error, data) {
+			if(error) {
+				console.log('TranslateIntent error : ' + error);
+			} else {
+				var url = data.Payload;
+				var speechOutput = {
+					type : 'SSML',
+					speech : '<speak><audio src=' + url + ' /></speak>'
+				};
+				response.tellWithCard(speechOutput);
+			}
+		});
+	},
 	"ChartIntent" : function(intent, session, response) {
 		var nth = intent.slots.Nth.value;
 		var fromSixth = intent.slots.fromSixth.value;
