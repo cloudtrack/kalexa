@@ -35,3 +35,8 @@ TranslateIntent Translate {Sentence} into Korean
 TranslateIntent How can I say {Sentence} in Korean
 
 TestIntent Execute test.
+
+PlaySongIntent Play {Nth} song in the chart
+PlaySongIntent Play the {Nth} song in the chart
+PlaySongIntent Play {NotinChart} song of {Nth} artist in the chart
+PlaySongIntent Play {Nth} artist's song {NotinChart}
