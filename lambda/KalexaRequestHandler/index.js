@@ -21,7 +21,7 @@
 /**
  * App ID for the skill
  */
-var APP_ID = "amzn1.ask.skill.1edc6a40-ac35-4517-8ea5-7a8f0a5dca54"; //replace with "amzn1.echo-sdk-ams.app.[your-unique-value-here]";
+var APP_ID = "amzn1.ask.skill.1edc6a40-ac35-4517-8ea5-7a8f0a5dca54";
 
 /**
  * The AlexaSkill prototype and helper functions
@@ -78,110 +78,99 @@ Kalexa.prototype.intentHandlers = {
 		response.tellWithCard("Speech Output is this!", "this is card title", "this is card content");
 	},
 	"LyricsIntent" : function(intent, session, response) {
-		var nth = intent.slots.Nth.value;
-		var number = intent.slots.number.value;
 		var songId;
-		if(!nth && !number) { // get last played song
-			console.log("latest song's lyrics");
-			var dynamodb = new aws.DynamoDB.DocumentClient();
-			var params = {
-				TableName: 'kpop_songs',
-				Key : {
-					"type" : "latest"
-				}
-			};
+		var async = require('async');
+		async.waterfall([
+			function(callback) {
+				var nth = intent.slots.Nth.value;
+				var number = intent.slots.number.value;
+				var songId;
+				if(!nth && !number) {
+					console.log("get last played song");
+					var dynamodb = new aws.DynamoDB.DocumentClient();
+					var params = {
+						TableName: 'kpop_songs',
+						Key : {
+							"type" : "latest"
+						}
+					};
 
-			dynamodb.get(params, function(err, data) {
-				if(err) {
-					console.log('err : ', err);
-					response.tellWithCard('error occured');
+					dynamodb.get(params, function(err, data) {
+						if(err) {
+							callback(err);
+						} else {
+							console.log('dynamo data', data);
+							songId = data.Item.songId;
+							callback(null, songId);
+						}
+					});
 				} else {
-					console.log('data : ', data);
-					songId = data.Item.songId;
+					console.log("get songId by number");
+					var n;
+					if(nth) { // get n by nth slot type
+						var nth_values = [ "first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "nineth", "tenth"];
+						n = nth_values.indexOf(nth);
+						if(n == -1) {
+							var nth_values = [ "1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th", "10th"];
+							n = nth_values.indexOf(nth);
+						}
+					} else { // get n by amazon.number
+						n = intent.slots.number.value;
+						n = n - 1;
+					}
 
-					// call lambda
-					var payload = {"songId" : songId};
-					console.log(payload);
-
-					lambda.invoke({
-						FunctionName: 'PlayLyrics',
-						Payload: JSON.stringify(payload)
-					}, function(error, data) {
-						if(error) { // error
-							console.log('err :', error);
-							response.tellWithCard('error occured');
-						} else { //
-							console.log('data : ', data);
-							var url = data.Payload.replace(/"/gi, "");
-							var speech = '<speak><audio src="' + url + '"/></speak>';
-							var speechOutput = {
-								type : 'SSML',
-								speech : speech
-							};
-							response.tellWithCard(speechOutput);
+					// get songId from dynamoDB
+					var dynamodb = new aws.DynamoDB.DocumentClient();
+					var params = {
+						TableName: 'kpop_chart',
+						Key : {
+							"chart" : "realtimeChart"
+						}
+					};
+					var songId;
+					dynamodb.get(params, function(err, data) {
+						if(err) {
+							callback(err);
+						} else {
+							console.log('dynamo data', data);
+							var chart = data.Item.chartData;
+							var song = chart[n];
+							songId = song.songId;
+							callback(null, songId);
 						}
 					});
 				}
-			});
-		} else {
-			console.log("get lyrics by number");
-			var n;
-			if(nth) { // get n by nth slot type
-				var nth_values = [ "first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "nineth", "tenth"];
-				n = nth_values.indexOf(nth);
-				if(n == -1) {
-					var nth_values = [ "1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th", "10th"];
-					n = nth_values.indexOf(nth);
-				}
-			} else { // get n by amazon.number
-				n = intent.slots.Number.value;
-				n = n - 1;
+			}, function(songId, callback) { // call lambda and get url of lyrics file
+				var payload = {"songId" : songId};
+				console.log('lambda payload', payload);
+				lambda.invoke({
+					FunctionName: 'PlayLyrics',
+					Payload: JSON.stringify(payload)
+				}, function(err, data) {
+					if(err) { // error
+						callback(err);
+					} else { //
+						console.log('data : ', data);
+						var url = data.Payload.replace(/"/gi, "");
+						callback(null, url);
+					}
+				});
 			}
-
-			// get songId from dynamoDB
-			var dynamodb = new aws.DynamoDB.DocumentClient();
-			var params = {
-				TableName: 'kpop_chart',
-				Key : {
-					"chart" : "realtimeChart"
-				}
-			};
-			var songId;
-			dynamodb.get(params, function(err, data) {
-				console.log('dynamoDB GET', 'err : ', err, 'data : ', data);
-				if(err) {
-					console.log(err, err.stack);
-					response.tellWithCard('Error occured');
-				} else {
-					var chart = data.Item.chartData;
-					var song = chart[n];
-					console.log(song);
-					songId = song.songId;
-
-					// call lambda
-					var payload = {"songId" : songId};
-					console.log(payload);
-					lambda.invoke({
-						FunctionName: 'PlayLyrics',
-						Payload: JSON.stringify(payload)
-					}, function(error, data) {
-						if(error) { // error
-							console.log('err :', error);
-							response.tellWithCard('error occured');
-						} else { //
-							console.log('data : ', data);
-							var url = data.Payload.replace(/"/gi, "");
-							var speech = '<speak><audio src="' + url + '"/></speak>';
-							var speechOutput = {
-								type : 'SSML',
-								speech : speech
-							};
-							response.tellWithCard(speechOutput);
-						}
-					});
-				}
-			});
-		}
+		], function(err, result) { // done callback
+			if(err) {
+				console.log('error', err);
+				response.tellWithCard('error occured');
+			} else {
+				console.log(result);
+				var url = result;
+				var speech = '<speak><audio src="' + url + '"/></speak>';
+				var speechOutput = {
+					type : 'SSML',
+					speech : speech
+				};
+				response.tellWithCard(speechOutput);
+			}
+		});
 	},
 	"EmotionIntent" : function(intent, session, response) {
 		var payload = {"emotion" : intent.slots.Emotion.value};

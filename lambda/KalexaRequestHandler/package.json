@@ -1,0 +1,7 @@
+{
+	"name": "kalexa",
+	"version": "1.0.0",
+	"dependencies": {
+		"async" : "^2.0.1"
+	}
+}
