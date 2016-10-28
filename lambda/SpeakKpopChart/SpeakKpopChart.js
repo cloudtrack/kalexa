@@ -68,8 +68,10 @@ function tts(params){
 }
 
 function makeAudioFile(params, filename){
-    s3.getObject({Bucket: 'koreantts', Key: filename}, function (err, data) {
-            if(err) tts(params);
-            else console.log(filename + ' already exists');
-    });
+    var url = s3.getSignedUrl('getObject', {Bucket: 'koreantts', Key: filename});
+    if(url === null){
+        tts(params);
+    } else {
+        console.log(filename + ' already exists');
+    }
 }
