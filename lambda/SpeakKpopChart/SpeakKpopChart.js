@@ -1,12 +1,13 @@
 /**
- * upload mp3 files about K-pop chart that are not in S3 yet
+ *
  * @param .
- * @return chart data
+ * @return upload mp3 files about K-pop chart that are not in S3 yet
  */
 
 const aws = require('aws-sdk');
 const lambda = new aws.Lambda();
 var s3 = new aws.S3();
+var dynamodb = new aws.DynamoDB.DocumentClient();
 
 exports.handler = (event, context, callback) => {
     var params = {
@@ -24,7 +25,8 @@ exports.handler = (event, context, callback) => {
                 if(idx != -1){
                     chart[i].songName = temp.substring(0,idx-1);
                 }
-                var songFileName = JSON.stringify(chart[i].songId) + '1.mp3';
+                var songId = chart[i].songId;
+                var songFileName = JSON.stringify(songId) + '1.mp3';
                 var payload = {
                     text: chart[i].songName,
                     fileName: songFileName
@@ -34,7 +36,7 @@ exports.handler = (event, context, callback) => {
                     FunctionName: 'TTS',
                     Payload: JSON.stringify(payload)
                 };
-                makeAudioFile(params, songFileName);
+                makeAudioFile(params, songId, songFileName);
 
                 var artistsNum = chart[i].artists.length;
                 for(var j=0; j<artistsNum; j++){
@@ -43,7 +45,8 @@ exports.handler = (event, context, callback) => {
                     if(idx != -1){
                         chart[i].artists[j].artistName = temp.substring(0,idx-1);
                     }
-                    var artistFileName = chart[i].artists[j].artistId + '1.mp3';
+                    var artistId = chart[i].artists[j].artistId;
+                    var artistFileName = artistId + '1.mp3';
                     payload = {
                         text: chart[i].artists[j].artistName,
                         fileName: artistFileName
@@ -52,7 +55,7 @@ exports.handler = (event, context, callback) => {
                         FunctionName: 'TTS',
                         Payload: JSON.stringify(payload)
                     };
-                    makeAudioFile(params, artistFileName);
+                    makeAudioFile(params, artistId, artistFileName);
                 }
             }
             callback(null, chart);
@@ -67,11 +70,21 @@ function tts(params){
     });
 }
 
-function makeAudioFile(params, filename){
-    var url = s3.getSignedUrl('getObject', {Bucket: 'koreantts', Key: filename});
-    if(url === null){
-        tts(params);
-    } else {
-        console.log(filename + ' already exists');
-    }
+function makeAudioFile(params, id, filename){
+    dynamodb.get({TableName: 'kpop_name', Key: {"Id": id}}, function(err, data) {
+       if(err || Object.keys(data).length === 0){
+           tts(params);
+           dynamodb.put({
+               TableName: 'kpop_name',
+               Item: {
+                   "Id" : id,
+                   "url": "https://s3.amazonaws.com/koreantts/" + filename
+               }
+           }, function(err, data) {
+              if(err) console.log(err, err.stack);
+           });
+       } else {
+           console.log(id, 'url : ' + data.Item.url);
+       }
+    });
 }
