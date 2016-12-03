@@ -68,7 +68,7 @@
             	}
         	  ]
         },
-        {
+      	{
           	"intent" : "PlaySongIntent",
           	"slots" : [
       	      	{
@@ -80,6 +80,10 @@
                   "type" : "NotinChart"
                 }
         	  ]
+        }, 
+      	{
+        	"intent" : "CollaborationFilteringIntent" 
         }
     ]
 }
+

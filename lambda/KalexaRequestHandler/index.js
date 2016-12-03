@@ -445,6 +445,33 @@ Kalexa.prototype.intentHandlers = {
 				}
             });
 		}
+	},
+	"CollaborationFilteringIntent" : function(intent, session, response) {
+		var userId = session.user.userId;
+		var payload = {
+			"userId" : userId
+		};
+	    lambda.invoke({
+	        FunctionName: 'CollaborationFilteringIntent',
+	        Payload: JSON.stringify(payload)
+	    }, function(error, data) {
+			if(error) {
+				console.log('err :', error);
+				response.tellWithCard('error occured');
+			} else {
+				console.log('data : ', data);
+				if(data.Payload) {
+					console.log(data.Payload);
+					var url = data.Payload.replace(/"/gi, "");
+					var speech = "<speak><audio src=\"" + url +  "\"/></speak>";
+					var speechOutput = {
+						type : 'SSML',
+						speech : speech
+					};
+					response.tellWithCard(speechOutput);
+				}
+			}
+        });
 	}
 };
 
