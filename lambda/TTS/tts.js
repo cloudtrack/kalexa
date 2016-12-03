@@ -85,7 +85,11 @@ exports.handler = (event, context, callback) => {
 		'text': event.text,
 	});
 
-	var tempName = new Date().getTime() + '.mp3';
+	var tempName = 'ttstemp.mp3';
+	var fileName = new Date().getTime() + '.mp3';
+	if(event.fileName)
+		fileName = event.fileName;
+
 	cp.exec(
 		'cp /var/task/ffmpeg ' + DEFAULT_PATH + '; chmod 755 ' + DEFAULT_PATH + 'ffmpeg; '
 		+ 'ls -l ' + DEFAULT_PATH + 'ffmpeg; rm -rf ' + DEFAULT_PATH + tempName,
@@ -94,22 +98,39 @@ exports.handler = (event, context, callback) => {
 				console.log('loading ffmpeg error : ' + error);
 			} else {
 				console.log('loading ffmpeg succeed');
-				//console.log('stdout : ' + stdout);
-				//console.log('stderr : ' + stderr);
+				// Naver
 				const req = https.request(options, (res) => {
 					console.log('TTS api returned');
 					var tempFile = fs.createWriteStream(DEFAULT_PATH + tempName);
 					res.pipe(tempFile);
 
-					var fileName = new Date().getTime() + '.mp3';
-					if(event.fileName)
-						fileName = event.fileName;
-
 					convertMP3(tempName, fileName, callback);
-				});
+					});
 				req.on('error', callback);
 				req.write(data);
 				req.end();
+
+				// Google - wget needed
+				/*
+				var tempFilePath = DEFAULT_PATH + tempName;
+				cp.exec(
+					'wget -q -U Mozilla -O ' + tempFilePath + ' http://translate.google.com/translate_tts?ie=UTF-8&idx=0&textlen=1024&client=tw-ob&q=' + event.text + '&tl=Ko-kr',
+					function(error, stdout, stderr) {
+						if(error) {
+							console.log('google api error : ' + error);
+						} else {
+							console.log('google api succeed');
+							console.log(stdout);
+							console.log('err : ' + stderr);
+							cp.exec(
+								'ls -al /tmp/',
+								function(error, stdout, stderr) {
+									console.log('ls temp = ' + stdout + stderr);
+								});
+							//convertMP3(tempName, fileName, callback);
+						}
+						});
+				*/
 			}
 		}
 	);
