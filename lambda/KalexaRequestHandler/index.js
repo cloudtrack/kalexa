@@ -78,6 +78,7 @@ Kalexa.prototype.intentHandlers = {
 		response.tellWithCard("Speech Output is this!", "this is card title", "this is card content");
 	},
 	"LyricsIntent" : function(intent, session, response) {
+		var userId = session.user.userId;
 		var songId;
 		var async = require('async');
 		async.waterfall([
@@ -89,9 +90,9 @@ Kalexa.prototype.intentHandlers = {
 					console.log("get last played song");
 					var dynamodb = new aws.DynamoDB.DocumentClient();
 					var params = {
-						TableName: 'kpop_songs',
+						TableName: 'kpop_playlist',
 						Key : {
-							"type" : "latest"
+							userId : userId
 						}
 					};
 
@@ -100,7 +101,8 @@ Kalexa.prototype.intentHandlers = {
 							callback(err);
 						} else {
 							console.log('dynamo data', data);
-							songId = data.Item.songId;
+							var songs = data.Item.songs;
+							songId = songs[songs.length-1];
 							callback(null, songId);
 						}
 					});
@@ -173,7 +175,11 @@ Kalexa.prototype.intentHandlers = {
 		});
 	},
 	"EmotionIntent" : function(intent, session, response) {
-		var payload = {"emotion" : intent.slots.Emotion.value};
+		var userId = session.user.userId;
+		var payload = {
+			"emotion" : intent.slots.Emotion.value,
+			"userId" : userId
+		};
 	    lambda.invoke({
 	        FunctionName: 'EmotionBasedRecommendation',
 	        Payload: JSON.stringify(payload)

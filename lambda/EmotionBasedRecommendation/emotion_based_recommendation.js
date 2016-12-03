@@ -20,7 +20,8 @@ var recommendations = {
 
 exports.handler = function(event, context, callback) {
 	var emotion = event.emotion;
-	console.log(emotion);
+	var userId = event.userId;
+
 	var emotionCategory;
 	Object.keys(emotions).forEach(function(key) { // get emotion category
 		var list = emotions[key];
@@ -36,24 +37,58 @@ exports.handler = function(event, context, callback) {
 
 	var db = new aws.DynamoDB.DocumentClient();
 	var params = {
-		TableName: 'kpop_songs',
+		TableName: 'kpop_playlist',
 		Key : {
-			type : 'latest'
+			userId : userId
 		},
-		UpdateExpression : "set songId = :songId",
-		ExpressionAttributeValues : {
-			":songId" : songId
-		}
 	};
 
-	db.update(params, function(err, data) {
+	db.get(params, function(err, data) {
 		if(err) {
-			console.log('db update error :', err);
-		} else {
-			console.log("Updated item:", data);
+			console.log('db updateee error :', err);
+			context.done('error', err);
 		}
-		context.succeed(S3_PREFIX + songId+ '.mp3');
+        
+		if(Object.keys(data).length === 0) { // if empty 
+			var params = {
+				TableName: 'kpop_playlist',
+				Item : {
+					userId : userId,
+					songs : [songId]
+				},
+			};
+			db.put(params, function(err, data) { // create playlist
+				if(err) {
+					console.log('db put error :', err);
+				} else {
+					console.log("Put item:", data);
+				}
+				context.succeed(S3_PREFIX + songId+ '.mp3');
+			});
+		} else {
+			var params = {
+				TableName: 'kpop_playlist',
+				Key : {
+					userId : userId
+				},
+				UpdateExpression : "set songs = list_append(songs, :songId)",
+				ExpressionAttributeValues : {
+					":songId" : [songId]
+				}
+			};
+
+			db.update(params, function(err, data) {
+				if(err) {
+					console.log('db update error :', err);
+				} else {
+					console.log("Updated item:", data);
+				}
+				context.succeed(S3_PREFIX + songId+ '.mp3');
+			});
+		}
 	});
+
 }
 
 //exports.handler();
+
