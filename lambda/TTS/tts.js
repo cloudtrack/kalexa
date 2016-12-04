@@ -57,10 +57,10 @@ function convertMP3(tempName, fileName, callbackAfterUpload) {
 		+ DEFAULT_PATH + fileName,
 		function(error, stdout, stderr) {
 			if(error) {
-				console.log('executing ffmpeg error : RETRY');
+				console.log('retry for ffmpeg fail - error : ' + error);
 				convertMP3(tempName, fileName, callbackAfterUpload);
 			} else {
-				console.log('executing ffmpeg');
+				console.log('ffmpeg succeed');
 				uploadAndClean(tempName, fileName, callbackAfterUpload);
 			}
 		}
