@@ -26,12 +26,25 @@ ChartIntent I want to know know {Nth} song's artist.
 ChartIntent Let me know {Nth} song's artist.
 ChartIntent Who is the {Nth} song's artist.
 ChartIntent Who is {Nth} song's artist.
+ChartIntent real time chart
+ChartIntent k-pop chart
+ChartIntent tell me the chart {fromSixth}
+ChartIntent Who is the {Nth} artist.
 
-OtherSongIntent I want to know other song of {Nth} artist
+OtherSongIntent Let me know other song of {Nth} artist
 
 TranslateIntent What is {Sentence} in Korean
 TranslateIntent Translate {Sentence}
 TranslateIntent Translate {Sentence} into Korean
 TranslateIntent How can I say {Sentence} in Korean
+TranslateIntent baby {Sentence}
 
 TestIntent Execute test.
+
+PlaySongIntent Play {Nth} song in the chart
+PlaySongIntent Play the {Nth} song in the chart
+PlaySongIntent Play {NotinChart} song of {Nth} artist in the chart
+PlaySongIntent Play {Nth} artist's song {NotinChart}
+
+CollaborationFilteringIntent recommend me any song
+
