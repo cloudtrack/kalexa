@@ -102,7 +102,11 @@ Kalexa.prototype.intentHandlers = {
 						} else {
 							console.log('dynamo data', data);
 							var songs = data.Item.songs;
-							songId = songs[songs.length-1];
+							if(songs.length === 0) {
+								callback('NO_PLAYLIST_ERR');
+							} else {
+								songId = songs[songs.length-1];
+							}
 							callback(null, songId);
 						}
 					});
@@ -160,6 +164,9 @@ Kalexa.prototype.intentHandlers = {
 			}
 		], function(err, result) { // done callback
 			if(err) {
+				if(err === 'NO_PLAYLIST_ERR') {
+					response.tellWithCard('you never played any song');
+				}
 				console.log('error', err);
 				response.tellWithCard('error occured');
 			} else {
