@@ -110,7 +110,7 @@ exports.handler = (event, context, callback) => {
 				req.write(data);
 				req.end();
 
-				// Google - wget needed
+				// Google deprecated - wget needed
 				/*
 				var tempFilePath = DEFAULT_PATH + tempName;
 				cp.exec(

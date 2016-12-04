@@ -8,9 +8,18 @@
 
 const https = require('https');
 const querystring = require('querystring');
+const googleTranslate = require('google-translate')('AIzaSyDfzENB3DX62v8wc0duBep5EhfJ7S63xWU');
 
 exports.handler = (event, context, callback) => {
-    var options = {
+	// Google Cloud Translate API
+	googleTranslate.translate(event.text, 'en', 'ko', function(err, translation) {
+		console.log('Google translated : ' + translation.translatedText);
+		callback(null, translation.translatedText);
+	});
+
+	// Naver Translate API
+	/*
+	var options = {
         hostname: 'openapi.naver.com',
         port: 443,
         path: '/v1/language/translate',
@@ -41,6 +50,7 @@ exports.handler = (event, context, callback) => {
     });
     req.on('error', callback);
     req.write(data);
-    req.end();
+	req.end();
+	*/
 };
 
