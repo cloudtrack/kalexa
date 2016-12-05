@@ -80,9 +80,9 @@
                   "type" : "NotinChart"
                 }
         	  ]
-        }, 
+        },
       	{
-        	"intent" : "CollaborationFilteringIntent" 
+        	"intent" : "CollaborationFilteringIntent"
         }
     ]
 }

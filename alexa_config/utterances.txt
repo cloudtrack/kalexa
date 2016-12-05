@@ -1,3 +1,7 @@
+AMAZON.StopIntent Stop.
+AMAZON.StopIntent Never mind.
+AMAZON.StopIntent I want to break up with you.
+
 LyricsIntent I want to know {Nth} song's lyrics.
 LyricsIntent What's the lyrics of {Nth} song
 LyricsIntent What is the lyrics of {Nth} song

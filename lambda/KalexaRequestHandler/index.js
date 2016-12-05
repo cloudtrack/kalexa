@@ -55,8 +55,8 @@ Kalexa.prototype.eventHandlers.onSessionStarted = function (sessionStartedReques
 
 Kalexa.prototype.eventHandlers.onLaunch = function (launchRequest, session, response) {
     console.log("Kalexa onLaunch requestId: " + launchRequest.requestId + ", sessionId: " + session.sessionId);
-    var speechOutput = "Welcome to the Alexa Skills Kit, you can say hello";
-    var repromptText = "You can say hello";
+    var speechOutput = "Welcome to the Project Kei, ask me";
+    var repromptText = "Ask me";
     response.ask(speechOutput, repromptText);
 };
 
@@ -74,8 +74,8 @@ Kalexa.prototype.intentHandlers = {
     "AMAZON.HelpIntent": function (intent, session, response) {
         response.ask("You can say hello to me!", "You can say hello to me!");
     },
-	"QuizIntent" : function(intent, session, response) {
-		response.tellWithCard("Speech Output is this!", "this is card title", "this is card content");
+	"AMAZON.StopIntent": function (intent, session, response) {
+		response.tellWithCard("Bye");
 	},
 	"LyricsIntent" : function(intent, session, response) {
 		var userId = session.user.userId;
@@ -170,7 +170,7 @@ Kalexa.prototype.intentHandlers = {
 					type : 'SSML',
 					speech : speech
 				};
-				response.tellWithCard(speechOutput);
+				response.ask(speechOutput);
 			}
 		});
 	},
@@ -198,7 +198,7 @@ Kalexa.prototype.intentHandlers = {
 						type : 'SSML',
 						speech : speech
 					};
-					response.tellWithCard(speechOutput);
+					response.ask(speechOutput);
 				}
 			}
         });
@@ -209,7 +209,7 @@ Kalexa.prototype.intentHandlers = {
 			type : 'SSML',
 			speech : mp3URL
 		};
-		response.tellWithCard(speechOutput);
+		response.ask(speechOutput);
 	},
 	"TranslateIntent" : function(intent, session, response) {
 		var text = intent.slots.Sentence.value;
@@ -226,7 +226,7 @@ Kalexa.prototype.intentHandlers = {
 					type : 'SSML',
 					speech : '<speak><audio src=' + url + ' /></speak>'
 				};
-				response.tellWithCard(speechOutput);
+				response.ask(speechOutput);
 			}
 		});
 	},
@@ -264,7 +264,7 @@ Kalexa.prototype.intentHandlers = {
 						speechOutput += ' ' + rank[i] + ' song is ' + songText;
 					}
 					speechOutput += '. if you want to know the artist of the song, say like who is first song\'s artist</speak>'
-					response.tellWithCard({type: 'SSML', speech: speechOutput});
+					response.ask({type: 'SSML', speech: speechOutput});
 				}
 				else if(!nth){
 					console.log('first to fifth');
@@ -276,7 +276,7 @@ Kalexa.prototype.intentHandlers = {
 						speechOutput += ' ' + rank[i] + ' song is ' + songText;
 					}
 					speechOutput += '. if you want to know sixth to tenth rank of songs, say like let me know chart from sixth rank</speak>'
-					response.tellWithCard({type: 'SSML', speech: speechOutput});
+					response.ask({type: 'SSML', speech: speechOutput});
 				}
 				else{
 					console.log('speak artist');
@@ -305,7 +305,7 @@ Kalexa.prototype.intentHandlers = {
 						}
 					}
 					speechOutput += '</speak>'
-					response.tellWithCard({type: 'SSML', speech: speechOutput});
+					response.ask({type: 'SSML', speech: speechOutput});
 				}
 			}
 		});
@@ -341,7 +341,7 @@ Kalexa.prototype.intentHandlers = {
 
 				if(songsNum == 0){
 					speechOutput = '<speak>there isn\'t any other song of the artist ' + artistText + '</speak>';
-					response.tellWithCard({type: 'SSML', speech: speechOutput});
+					response.ask({type: 'SSML', speech: speechOutput});
 				} else {
 		        	speechOutput = '<speak>I recommend some songs of singer ' + artistText;
 					for(var i=0; i<songsNum; i++) {
@@ -351,7 +351,7 @@ Kalexa.prototype.intentHandlers = {
 						speechOutput += ' ' + rank[i] + ' song is ' + songText;
 					}
 	    			speechOutput += '</speak>';
-		    		response.tellWithCard({type: 'SSML', speech: speechOutput});
+		    		response.ask({type: 'SSML', speech: speechOutput});
 				}
 			}
 	    });
@@ -401,7 +401,7 @@ Kalexa.prototype.intentHandlers = {
 							} else {
 								var url = "https://s3.amazonaws.com/kpopmusic/" + songId + ".mp3";
 								var songText = "<speak><audio src=\"" + url + "\"/></speak>";
-								response.tellWithCard({type: 'SSML', speech: songText});
+								response.ask({type: 'SSML', speech: songText});
 							}
 						});
 					}
@@ -432,11 +432,11 @@ Kalexa.prototype.intentHandlers = {
 								dynamodb.update(params, function(err, data) {
 									if(err) {
 										console.log('db update error :', err);
-										response.tellWithCard('Error occured');
+										response.ask('Error occured');
 									} else {
 										var url = "https://s3.amazonaws.com/kpopmusic/" + songId + ".mp3";
 										var songText = "<speak><audio src=\"" + url + "\"/></speak>";
-										response.tellWithCard({type: 'SSML', speech: songText});
+										response.ask({type: 'SSML', speech: songText});
 									}
 								});
 			                }
@@ -468,11 +468,15 @@ Kalexa.prototype.intentHandlers = {
 						type : 'SSML',
 						speech : speech
 					};
-					response.tellWithCard(speechOutput);
+					response.ask(speechOutput);
 				}
 			}
         });
-	}
+	},
+	"QuizIntent" : function(intent, session, response) {
+		response.ask("Speech Output is this!");
+	},
+
 };
 
 // Create the handler that responds to the Alexa Request.
