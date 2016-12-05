@@ -101,13 +101,13 @@ Kalexa.prototype.intentHandlers = {
 							callback(err);
 						} else {
 							console.log('dynamo data', data);
-							var songs = data.Item.songs;
-							if(songs.length === 0) {
+							if(Object.keys(data).length === 0) {
 								callback('NO_PLAYLIST_ERR');
 							} else {
+							    var songs = data.Item.songs;
 								songId = songs[songs.length-1];
+								callback(null, songId);
 							}
-							callback(null, songId);
 						}
 					});
 				} else {
@@ -492,3 +492,4 @@ exports.handler = function (event, context) {
     var kalexa = new Kalexa();
     kalexa.execute(event, context);
 };
+
