@@ -14,6 +14,8 @@ process.env['PATH'] = process.env['PATH'] + ':' + process.env['LAMBDA_TASK_ROOT'
  * MP3 file is saved in S3
  */
 
+const mode = 'Naver'; 		// Google | Naver
+
 const https = require('https');
 const querystring = require('querystring');
 const aws = require('aws-sdk');
@@ -55,10 +57,10 @@ function convertMP3(tempName, fileName, callbackAfterUpload) {
 		+ DEFAULT_PATH + fileName,
 		function(error, stdout, stderr) {
 			if(error) {
-				console.log('executing ffmpeg error : RETRY');
+				console.log('retry for ffmpeg fail - error : ' + error);
 				convertMP3(tempName, fileName, callbackAfterUpload);
 			} else {
-				console.log('executing ffmpeg');
+				console.log('ffmpeg succeed');
 				uploadAndClean(tempName, fileName, callbackAfterUpload);
 			}
 		}
@@ -66,7 +68,7 @@ function convertMP3(tempName, fileName, callbackAfterUpload) {
 }
 
 exports.handler = (event, context, callback) => {
-	var options = {
+	var options_naver = {
 		hostname: 'openapi.naver.com',
 		port: 443,
 		path: '/v1/voice/tts.bin',
@@ -79,11 +81,35 @@ exports.handler = (event, context, callback) => {
             'X-Naver-Client-Secret': 'na0qFADoLh',
         }
     };
-	var data = querystring.stringify({
+	var data_naver = querystring.stringify({
 		'speaker': 'mijin', // Korean, Female. (Male=jinho)
 		'speed': '0', // -5x ~ 5x
 		'text': event.text,
 	});
+
+	var google_param = querystring.stringify({
+		'ie': 'UTF-8',
+		'q': event.text,
+		'tl': 'Ko-kr',
+		'client': 'tw-ob',
+		'idx': 0,
+		'total': 1,
+		'textlen': 1024
+	});
+	var options_google = {
+		hostname: 'translate.google.com',
+		port: 443,
+		path: '/translate_tts?' + google_param,
+		method: 'GET',
+		headers: {
+			'Referer': 'http://translate.google.com/',
+			'User-Agent': 'stagefright/1.2 (Linux;Android 5.0)'
+		}
+	};
+	var data_google = '';
+
+	var options = (mode == 'Google')? options_google : options_naver;
+	var data = (mode == 'Google')? data_google : data_naver;
 
 	var tempName = 'ttstemp.mp3';
 	var fileName = new Date().getTime() + '.mp3';
@@ -105,32 +131,10 @@ exports.handler = (event, context, callback) => {
 					res.pipe(tempFile);
 
 					convertMP3(tempName, fileName, callback);
-					});
+				});
 				req.on('error', callback);
 				req.write(data);
 				req.end();
-
-				// Google deprecated - wget needed
-				/*
-				var tempFilePath = DEFAULT_PATH + tempName;
-				cp.exec(
-					'wget -q -U Mozilla -O ' + tempFilePath + ' http://translate.google.com/translate_tts?ie=UTF-8&idx=0&textlen=1024&client=tw-ob&q=' + event.text + '&tl=Ko-kr',
-					function(error, stdout, stderr) {
-						if(error) {
-							console.log('google api error : ' + error);
-						} else {
-							console.log('google api succeed');
-							console.log(stdout);
-							console.log('err : ' + stderr);
-							cp.exec(
-								'ls -al /tmp/',
-								function(error, stdout, stderr) {
-									console.log('ls temp = ' + stdout + stderr);
-								});
-							//convertMP3(tempName, fileName, callback);
-						}
-						});
-				*/
 			}
 		}
 	);
