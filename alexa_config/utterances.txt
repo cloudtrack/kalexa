@@ -1,18 +1,15 @@
 AMAZON.StopIntent Stop.
 AMAZON.StopIntent Never mind.
-AMAZON.StopIntent I want to break up with you.
+AMAZON.StopIntent I hate you.
 
-LyricsIntent I want to know {Nth} song's lyrics.
 LyricsIntent What's the lyrics of {Nth} song
 LyricsIntent What is the lyrics of {Nth} song
-LyricsIntent tell me the lyrics of {Nth} song.
-LyricsIntent I want to know the lyrics of song number {number}
-LyricsIntent what's the lyrics of song number {number}
-LyricsIntent what is the lyrics of song number {number}
-LyricsIntent tell me the lyrics of song number {number}
-LyricsIntent I want to know this song's lyrics.
-LyricsIntent what is this song's lyrics
-LyricsIntent tell me the lyrics of this song.
+LyricsIntent Tell me the lyrics of {Nth} song.
+LyricsIntent What's the lyrics of song number {number}
+LyricsIntent What is the lyrics of song number {number}
+LyricsIntent Tell me the lyrics of song number {number}
+LyricsIntent What is this song's lyrics
+LyricsIntent Tell me the lyrics of this song.
 
 EmotionIntent I feel {Emotion}
 EmotionIntent I'm {Emotion}
@@ -30,18 +27,16 @@ ChartIntent I want to know know {Nth} song's artist.
 ChartIntent Let me know {Nth} song's artist.
 ChartIntent Who is the {Nth} song's artist.
 ChartIntent Who is {Nth} song's artist.
-ChartIntent real time chart
-ChartIntent k-pop chart
-ChartIntent tell me the chart {fromSixth}
+ChartIntent Real time chart
+ChartIntent K-pop chart
 ChartIntent Who is the {Nth} artist.
 
 OtherSongIntent Let me know other song of {Nth} artist
 
-TranslateIntent What is {Sentence} in Korean
+TranslateIntent {Sentence} in Korean
 TranslateIntent Translate {Sentence}
 TranslateIntent Translate {Sentence} into Korean
 TranslateIntent How can I say {Sentence} in Korean
-TranslateIntent baby {Sentence}
 
 TestIntent Execute test.
 
@@ -50,9 +45,9 @@ PlaySongIntent Play the {Nth} song in the chart
 PlaySongIntent Play {NotinChart} song of {Nth} artist in the chart
 PlaySongIntent Play {Nth} artist's song {NotinChart}
 
-CollaborationFilteringIntent recommend me any song
+CollaborationFilteringIntent Recommend me any song
 
 QuizIntent Give me {Number} quizzes.
 
-QuizAnswerIntent The answer is {Answer}.
+QuizAnswerIntent The answer is {Answer}
 QuizAnswerIntent {Answer}
