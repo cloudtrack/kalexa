@@ -94,11 +94,14 @@
 			]
 		},
 		{
-			"intent" : "TrueAnswerIntent"
-		},
-		{
-			"intent" : "FalseAnswerIntent"
+			"intent" : "QuizAnswerIntent",
+			"slots" : [
+				{
+					"name" : "Answer",
+					"type" : "Boolean"
+				}
+			]
 		}
-    ]
+	]
 }
 

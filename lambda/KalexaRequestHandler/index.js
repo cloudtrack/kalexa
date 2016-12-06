@@ -496,28 +496,12 @@ Kalexa.prototype.intentHandlers = {
 			response.ask(speechOutput);
 		});
 	},
-	"TrueAnswerIntent" : function(intent, session, response) {
+	"QuizAnswerIntent" : function(intent, session, response) {
 		var userId = session.user.userId;
+		var answer = intent.slots.Answer.value;
 		var payload = {
 			"userId" : userId,
-			"answer" : "True"
-		};
-		lambda.invoke({
-			FunctionName: 'Quiz',
-			Payload: JSON.stringify(payload)
-		}, function(error, data) {
-			var s = data.Payload.replace(/\\/g, '');
-			s = s.substring(1, s.length-1);
-			var dic = JSON.parse(s);
-			var speechOutput = makeQuizSpeechOutput(dic.marking, dic.quiz);
-			response.ask(speechOutput);
-		});
-	},
-	"FalseAnswerIntent" : function(intent, session, response) {
-		var userId = session.user.userId;
-		var payload = {
-			"userId" : userId,
-			"answer" : "False"
+			"answer" : answer
 		};
 		lambda.invoke({
 			FunctionName: 'Quiz',
@@ -535,7 +519,7 @@ Kalexa.prototype.intentHandlers = {
 function makeQuizSpeechOutput(marking, quiz) {
 	var s = '<speak>';
 	if(marking !== undefined) {
-		if(marking == 'Corrent')
+		if(marking == 'Correct')
 			s += 'Correct. ';
 		else
 			s += 'Incorrect. ';

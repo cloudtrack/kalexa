@@ -54,5 +54,5 @@ CollaborationFilteringIntent recommend me any song
 
 QuizIntent Give me {Number} quizzes.
 
-TrueAnswerIntent The answer is true.
-FalseAnswerIntent The answer is false.
+QuizAnswerIntent The answer is {Answer}.
+QuizAnswerIntent {Answer}
