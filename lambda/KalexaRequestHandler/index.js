@@ -481,10 +481,85 @@ Kalexa.prototype.intentHandlers = {
         });
 	},
 	"QuizIntent" : function(intent, session, response) {
-		response.ask("Speech Output is this!");
+		var payload = {
+			"userId" : session.user.userId,
+			"number" : intent.slots.Number.value
+		};
+		lambda.invoke({
+			FunctionName: 'Quiz',
+			Payload: JSON.stringify(payload)
+		}, function(error, data) {
+			var s = data.Payload.replace(/\\/g, '');
+			s = s.substring(1, s.length-1);
+			var dic = JSON.parse(s);
+			var speechOutput = makeQuizSpeechOutput(dic.marking, dic.quiz);
+			response.ask(speechOutput);
+		});
 	},
-
+	"TrueAnswerIntent" : function(intent, session, response) {
+		var userId = session.user.userId;
+		var payload = {
+			"userId" : userId,
+			"answer" : "True"
+		};
+		lambda.invoke({
+			FunctionName: 'Quiz',
+			Payload: JSON.stringify(payload)
+		}, function(error, data) {
+			var s = data.Payload.replace(/\\/g, '');
+			s = s.substring(1, s.length-1);
+			var dic = JSON.parse(s);
+			var speechOutput = makeQuizSpeechOutput(dic.marking, dic.quiz);
+			response.ask(speechOutput);
+		});
+	},
+	"FalseAnswerIntent" : function(intent, session, response) {
+		var userId = session.user.userId;
+		var payload = {
+			"userId" : userId,
+			"answer" : "False"
+		};
+		lambda.invoke({
+			FunctionName: 'Quiz',
+			Payload: JSON.stringify(payload)
+		}, function(error, data) {
+			var s = data.Payload.replace(/\\/g, '');
+			s = s.substring(1, s.length-1);
+			var dic = JSON.parse(s);
+			var speechOutput = makeQuizSpeechOutput(dic.marking, dic.quiz);
+			response.ask(speechOutput);
+		});
+	}
 };
+
+function makeQuizSpeechOutput(marking, quiz) {
+	var s = '<speak>';
+	if(marking !== undefined) {
+		if(marking == 'Corrent')
+			s += 'Correct. ';
+		else
+			s += 'Incorrect. ';
+	}
+
+	if(quiz === undefined) {
+		s += 'Quiz over.';
+	} else {
+		if(marking === undefined)
+			s += 'Quiz start. ';
+		else
+			s += 'Next quiz. ';
+
+		s += quiz.English;
+		s += "<audio src=\"" + quiz.Korean.replace(/"/gi, "") + "\"/>";
+	}
+	s += '</speak>';
+	var ret = {
+		type : 'SSML',
+		speech : s
+	};
+
+	return ret;
+}
 
 // Create the handler that responds to the Alexa Request.
 exports.handler = function (event, context) {
