@@ -24,11 +24,11 @@ const cp = require('child_process');
 
 const DEFAULT_PATH = '/tmp/';
 
-function uploadAndClean(tempName, fileName, callback) {
+function uploadAndClean(bucketName, tempName, fileName, callback) {
 	var s3 = new aws.S3();
 	var file = fs.createReadStream(DEFAULT_PATH + fileName);
 	var s3param = {
-		Bucket: 'koreantts',
+		Bucket: bucketName,
 		Key: fileName,
 		Body: file,
 		ACL: 'public-read'
@@ -43,13 +43,13 @@ function uploadAndClean(tempName, fileName, callback) {
 					console.log('deleting temp error : ' + error);
 				else
 					console.log('deleting temp succeed');
-				callback(null, 'https://s3.amazonaws.com/koreantts/' + fileName);
+				callback(null, 'https://s3.amazonaws.com/' + bucketName + '/' + fileName);
 			}
 		);
 	});
 }
 
-function convertMP3(tempName, fileName, callbackAfterUpload) {
+function convertMP3(bucketName, tempName, fileName, callbackAfterUpload) {
 	cp.exec(
 		DEFAULT_PATH + 'ffmpeg -i ' + DEFAULT_PATH + tempName
 		+ ' -analyzeduration 10000000 -probesize 100000000 '
@@ -58,10 +58,10 @@ function convertMP3(tempName, fileName, callbackAfterUpload) {
 		function(error, stdout, stderr) {
 			if(error) {
 				console.log('retry for ffmpeg fail - error : ' + error);
-				convertMP3(tempName, fileName, callbackAfterUpload);
+				convertMP3(bucketName, tempName, fileName, callbackAfterUpload);
 			} else {
 				console.log('ffmpeg succeed');
-				uploadAndClean(tempName, fileName, callbackAfterUpload);
+				uploadAndClean(bucketName, tempName, fileName, callbackAfterUpload);
 			}
 		}
 	);
@@ -113,8 +113,11 @@ exports.handler = (event, context, callback) => {
 
 	var tempName = 'ttstemp.mp3';
 	var fileName = new Date().getTime() + '.mp3';
+	var bucketName = 'koreantts';
 	if(event.fileName)
 		fileName = event.fileName;
+	if(event.bucketName)
+		bucketName = event.bucketName;
 
 	cp.exec(
 		'cp /var/task/ffmpeg ' + DEFAULT_PATH + '; chmod 755 ' + DEFAULT_PATH + 'ffmpeg; '
@@ -130,7 +133,7 @@ exports.handler = (event, context, callback) => {
 					var tempFile = fs.createWriteStream(DEFAULT_PATH + tempName);
 					res.pipe(tempFile);
 
-					convertMP3(tempName, fileName, callback);
+					convertMP3(bucketName, tempName, fileName, callback);
 				});
 				req.on('error', callback);
 				req.write(data);
