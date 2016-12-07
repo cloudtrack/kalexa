@@ -499,11 +499,6 @@ Kalexa.prototype.intentHandlers = {
 	"QuizAnswerIntent" : function(intent, session, response) {
 		var userId = session.user.userId;
 		var answer = intent.slots.Answer.value;
-		if(answer.toLowerCase() == 'true')
-			answer = 'True';
-		else
-			answer = 'False';
-
 		var payload = {
 			"userId" : userId,
 			"answer" : answer
