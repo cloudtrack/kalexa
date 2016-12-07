@@ -105,7 +105,8 @@ Kalexa.prototype.intentHandlers = {
 								callback('NO_PLAYLIST_ERR');
 							} else {
 							    var songs = data.Item.songs;
-								songId = songs[songs.length-1];
+								songInfo = songs[songs.length-1];
+								songId = songInfo.songId;
 								callback(null, songId);
 							}
 						}

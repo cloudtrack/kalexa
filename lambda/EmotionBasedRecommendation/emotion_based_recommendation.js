@@ -54,7 +54,7 @@ exports.handler = function(event, context, callback) {
 				TableName: 'kpop_playlist',
 				Item : {
 					userId : userId,
-					songs : [songId]
+					songs : [{songId:songId, artistId:0}]
 				},
 			};
 			db.put(params, function(err, data) { // create playlist
@@ -73,7 +73,7 @@ exports.handler = function(event, context, callback) {
 				},
 				UpdateExpression : "set songs = list_append(songs, :songId)",
 				ExpressionAttributeValues : {
-					":songId" : [songId]
+					":songId" : [{songId:songId, artistId:0}]
 				}
 			};
 
