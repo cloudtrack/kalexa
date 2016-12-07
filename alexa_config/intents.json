@@ -81,9 +81,27 @@
                 }
         	  ]
         },
-      	{
-        	"intent" : "CollaborationFilteringIntent"
-        }
-    ]
+		{
+			"intent" : "CollaborationFilteringIntent"
+		},
+		{
+			"intent" : "QuizIntent",
+			"slots" : [
+				{
+					"name" : "Number",
+					"type" : "AMAZON.NUMBER"
+				}
+			]
+		},
+		{
+			"intent" : "QuizAnswerIntent",
+			"slots" : [
+				{
+					"name" : "Answer",
+					"type" : "Boolean"
+				}
+			]
+		}
+	]
 }
 
