@@ -12,8 +12,27 @@ const DEFAULT_SONG = 3929469;
 function getMostPlayedSongInPlaylist(songs) {
 	var songCount = {};
 	songs.forEach(function(song, idx) {
-		if(songCount[song]) songCount[song] += 1;
-		else songCount[song] = 1;
+		var songId = song.songId;
+		if(songCount[songId]) songCount[songId] += 1;
+		else songCount[songId] = 1;
+	});
+	var mostPlayedSong, maxCount = 0;
+	Object.keys(songCount).forEach(function(key, idx) {
+		if(maxCount < songCount[key]) {
+			maxCount = songCount[key];
+			mostPlayedSong = key;
+		}
+	})
+	if(!mostPlayedSong) mostPlayedSong = DEFAULT_SONG;
+	return mostPlayedSong;
+}
+
+function getFavoriteArtistInPlaylist(songs) {
+	var songCount = {};
+	songs.forEach(function(song, idx) {
+		var artistId = song.artistId;
+		if(songCount[artistId]) songCount[artistId] += 1;
+		else songCount[artistId] = 1;
 	});
 	var mostPlayedSong, maxCount = 0;
 	Object.keys(songCount).forEach(function(key, idx) {
@@ -31,7 +50,8 @@ exports.handler = function(event, context, callback) {
 	var songId = DEFAULT_SONG; // default songs
 	async.waterfall([
 		function(cb) {
-			var playlistType = Math.floor(Math.random()*2); // 2 recommendations
+			var playlistType = Math.floor(Math.random()*3); // 3 recommendations
+			console.log('playlist', playlistType);
 			if(playlistType === 0) { // random user's playlist
 				db.scan({ 
 					TableName : 'kpop_playlist'
@@ -41,6 +61,7 @@ exports.handler = function(event, context, callback) {
 					}
 					var playlists = data.Items;
 					var random_idx = Math.floor(Math.random()*playlists.length);
+					
 					var playlist = playlists[random_idx];
 					if(playlist && playlist.songs) { // 
 						var songs = playlist.songs;
@@ -49,7 +70,7 @@ exports.handler = function(event, context, callback) {
 					    cb(null); // default song
 					}
 				});
-			} else { // TODO :similar playlist 
+			} else if(playlistType === 1) { // same favorite song user's
 				db.scan({ 
 					TableName : 'kpop_playlist'
 				}, function(err, data) {
@@ -57,7 +78,6 @@ exports.handler = function(event, context, callback) {
 						cb(null); // default song
 					}
 					var playlists = data.Items;
-					var playlist;
 					var mostPlayedSong = DEFAULT_SONG;
 					// get current user's most played song
 					playlists.forEach(function(p, idx) {
@@ -71,7 +91,8 @@ exports.handler = function(event, context, callback) {
 					// find user whose most played song issame as current user's
 					playlists.forEach(function(p, idx) {
 						var userMostPlayed = getMostPlayedSongInPlaylist(p.songs);
-						if(userMostPlayed === mostPlayedSong) recommendUserIdx = idx;
+						if(userMostPlayed === mostPlayedSong)
+							recommendUserIdx = idx;
 					});
 					var playlist = playlists[recommendUserIdx];
 					if(playlist && playlist.songs) { // 
@@ -79,8 +100,40 @@ exports.handler = function(event, context, callback) {
 
 						// remove most played song from the list, to prevent recommendation is same all the time
 						songs.forEach(function(song, idx) {
-							if(song === mostPlayedSong) delete songs[idx];
+							if(song.songId === mostPlayedSong) delete songs[idx];
 						});
+						cb(null, songs);
+					} else {
+					    cb(null); // default song
+					}
+				});
+			} else { // same favoirte artist user's
+				db.scan({ 
+					TableName : 'kpop_playlist'
+				}, function(err, data) {
+					if(err) {
+						cb(null); // default song
+					}
+					var playlists = data.Items;
+					var favoriteArtist;
+					// get current user's most played song
+					playlists.forEach(function(p, idx) {
+						if(p.userId === userId) { 
+							favoriteArtist = getFavoriteArtistInPlaylist(p.songs);
+							delete playlists[idx];
+						}
+					});
+
+					var recommendUserIdx = 0;
+					// find user whose favorite artist is same as current user's
+					playlists.forEach(function(p, idx) {
+						var userFavoriteArtist = getFavoriteArtistInPlaylist(p.songs);
+						if(userFavoriteArtist === favoriteArtist)
+							recommendUserIdx = idx;
+					});
+					var playlist = playlists[recommendUserIdx];
+					if(playlist && playlist.songs) { // 
+						var songs = playlist.songs;
 						cb(null, songs);
 					} else {
 					    cb(null); // default song
@@ -88,13 +141,15 @@ exports.handler = function(event, context, callback) {
 				});
 			}
 		}, function(songs, cb) {
+		    console.log('songs', songs)
 			if(songs) {
 				var type = Math.floor(Math.random() * 3);
+				console.log('song type', type);
 				if(type === 0) { // most recent played
-					songId = songs[songs.length - 1];
+					songId = songs[songs.length - 1].songId;
 				} else if(type === 1) { // random
-				    var random_idx = Math.floor(Math.random()*songs.legnth);
-					songId = songs[random_idx];
+				    var random_idx = Math.floor(Math.random()*songs.length);
+					songId = songs[random_idx].songId;
 				} else { // most played
 					songId = getMostPlayedSongInPlaylist(songs);
 				}
