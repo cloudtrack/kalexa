@@ -483,7 +483,11 @@ Kalexa.prototype.intentHandlers = {
 			                if(err) console.log(err, err.stack);
 			                else {
 								var songs = JSON.parse(data.Payload);
-								var songId = songs[0].songId;
+								var len = songs.length;
+								var randomIdx = Math.floor((Math.random()*len));
+								var songId = songs[randomIdx].songId;
+								songId *= 1
+
 								var params = {
 									TableName: 'kpop_songs',
 									Key : {
