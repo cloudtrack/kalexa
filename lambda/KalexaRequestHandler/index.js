@@ -105,7 +105,8 @@ Kalexa.prototype.intentHandlers = {
 								callback('NO_PLAYLIST_ERR');
 							} else {
 							    var songs = data.Item.songs;
-								songId = songs[songs.length-1];
+								songInfo = songs[songs.length-1];
+								songId = songInfo.songId;
 								callback(null, songId);
 							}
 						}
@@ -270,7 +271,7 @@ Kalexa.prototype.intentHandlers = {
 						var songText = "<audio src=\"" + url + "\"/>";
 						speechOutput += ' ' + rank[i] + ' song is ' + songText;
 					}
-					speechOutput += '. if you want to know the artist of the song, say like who is first song\'s artist</speak>'
+					speechOutput += 'if you want to know the artist of the song, say like who is first song\'s artist</speak>'
 					response.ask({type: 'SSML', speech: speechOutput});
 				}
 				else if(!nth){
@@ -282,7 +283,7 @@ Kalexa.prototype.intentHandlers = {
 						var songText = "<audio src=\"" + url + "\"/>";
 						speechOutput += ' ' + rank[i] + ' song is ' + songText;
 					}
-					speechOutput += '. if you want to know sixth to tenth rank of songs, say like let me know chart from sixth rank</speak>'
+					speechOutput += 'if you want to know sixth to tenth rank of songs, say like let me know chart from sixth rank</speak>'
 					response.ask({type: 'SSML', speech: speechOutput});
 				}
 				else{
@@ -364,6 +365,7 @@ Kalexa.prototype.intentHandlers = {
 	    });
 	},
 	"PlaySongIntent" : function(intent, session, response) {
+		var userId = session.user.userId;
         var nth = intent.slots.Nth.value;
         var notInChart = intent.slots.NotinChart.value;
         var dynamodb = new aws.DynamoDB.DocumentClient();
@@ -390,6 +392,7 @@ Kalexa.prototype.intentHandlers = {
                     var chart = data.Item.chartData;
 					var song = chart[n];
 					var songId = song.songId;
+					var artistId = song.artists[0].artistId;
 					if(!notInChart){//play song in the chart
 						var params = {
 							TableName: 'kpop_songs',
@@ -406,9 +409,64 @@ Kalexa.prototype.intentHandlers = {
 								console.log('db update error :', err);
 								response.tellWithCard('Error occured');
 							} else {
-								var url = "https://s3.amazonaws.com/kpopmusic/" + songId + ".mp3";
-								var songText = "<speak><audio src=\"" + url + "\"/></speak>";
-								response.ask({type: 'SSML', speech: songText});
+								var params = {
+									TableName: 'kpop_playlist',
+									Key : {
+										userId : userId
+									},
+								};
+
+								dynamodb.get(params, function(err, data) {
+									if(err) {
+										console.log('db updateee error :', err);
+										context.done('error', err);
+									}
+
+									if(Object.keys(data).length === 0) { // if empty
+										var params = {
+											TableName: 'kpop_playlist',
+											Item : {
+												userId : userId,
+												songs : [{artistId: artistId, songId: songId}]
+											},
+										};
+										dynamodb.put(params, function(err, data) { // create playlist
+											if(err) {
+												console.log('db put error :', err);
+											} else {
+												console.log("Put item:", data);
+
+												var url = "https://s3.amazonaws.com/kpopmusic/" + songId + ".mp3";
+												var songText = "<speak><audio src=\"" + url + "\"/></speak>";
+												response.ask({type: 'SSML', speech: songText});
+											}
+										});
+									} else {
+										var params = {
+											TableName: 'kpop_playlist',
+											Key : {
+												userId : userId
+											},
+											UpdateExpression : "set songs = list_append(songs, :songInfo)",
+											ExpressionAttributeValues : {
+												":songInfo" : [{artistId: artistId, songId: songId}]
+											}
+										};
+
+										dynamodb.update(params, function(err, data) {
+											if(err) {
+												console.log('db update error :', err);
+											} else {
+												console.log("Updated item:", data);
+
+												var url = "https://s3.amazonaws.com/kpopmusic/" + songId + ".mp3";
+												var songText = "<speak><audio src=\"" + url + "\"/></speak>";
+												response.ask({type: 'SSML', speech: songText});
+
+											}
+										});
+									}
+								});
 							}
 						});
 					}
@@ -441,9 +499,64 @@ Kalexa.prototype.intentHandlers = {
 										console.log('db update error :', err);
 										response.ask('Error occured');
 									} else {
-										var url = "https://s3.amazonaws.com/kpopmusic/" + songId + ".mp3";
-										var songText = "<speak><audio src=\"" + url + "\"/></speak>";
-										response.ask({type: 'SSML', speech: songText});
+										var params = {
+											TableName: 'kpop_playlist',
+											Key : {
+												userId : userId
+											},
+										};
+
+										dynamodb.get(params, function(err, data) {
+											if(err) {
+												console.log('db updateee error :', err);
+												context.done('error', err);
+											}
+
+											if(Object.keys(data).length === 0) { // if empty
+												var params = {
+													TableName: 'kpop_playlist',
+													Item : {
+														userId : userId,
+														songs : [{artistId: artistId, songId: songId}]
+													},
+												};
+												dynamodb.put(params, function(err, data) { // create playlist
+													if(err) {
+														console.log('db put error :', err);
+													} else {
+														console.log("Put item:", data);
+
+														var url = "https://s3.amazonaws.com/kpopmusic/" + songId + ".mp3";
+														var songText = "<speak><audio src=\"" + url + "\"/></speak>";
+														response.ask({type: 'SSML', speech: songText});
+													}
+												});
+											} else {
+												var params = {
+													TableName: 'kpop_playlist',
+													Key : {
+														userId : userId
+													},
+													UpdateExpression : "set songs = list_append(songs, :songInfo)",
+													ExpressionAttributeValues : {
+														":songInfo" : [{artistId: artistId, songId: songId}]
+													}
+												};
+
+												dynamodb.update(params, function(err, data) {
+													if(err) {
+														console.log('db update error :', err);
+													} else {
+														console.log("Updated item:", data);
+
+														var url = "https://s3.amazonaws.com/kpopmusic/" + songId + ".mp3";
+														var songText = "<speak><audio src=\"" + url + "\"/></speak>";
+														response.ask({type: 'SSML', speech: songText});
+
+													}
+												});
+											}
+										});
 									}
 								});
 			                }
@@ -551,4 +664,3 @@ exports.handler = function (event, context) {
     var kalexa = new Kalexa();
     kalexa.execute(event, context);
 };
-
