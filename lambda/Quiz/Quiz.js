@@ -120,7 +120,6 @@ function newQuiz(userId, ret, callback) {
 					}
 				}
 
-
 				var quiz = {
 					"English" : enSentence,
 					"Korean" : 'https://s3.amazonaws.com/koreanquiz/' + koNo + '.mp3'

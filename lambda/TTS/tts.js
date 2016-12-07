@@ -7,8 +7,9 @@ process.env['PATH'] = process.env['PATH'] + ':' + process.env['LAMBDA_TASK_ROOT'
 /**
  * Make an MP3 file reading text which was given by param,
  * Using Naver TTS API
- * @param text 		: Korean string to read
- * @param fileName  : (Optional) File name to be saved in S3
+ * @param text 		 : Korean string to read
+ * @param fileName   : (Optional) File name to be saved in S3
+ * @param bucketName : (Optional) Bucket of S3
  * @return the URL of an MP3 file
  *
  * MP3 file is saved in S3
