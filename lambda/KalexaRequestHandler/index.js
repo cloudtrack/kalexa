@@ -77,6 +77,14 @@ Kalexa.prototype.intentHandlers = {
 	"AMAZON.StopIntent": function (intent, session, response) {
 		response.tellWithCard("Bye");
 	},
+	"ClosingIntent": function (intent, session, response) {
+		var mp3URL = '<speak><audio src=\"https://s3.amazonaws.com/koreantts/closing.mp3\"/></speak>';
+		var speechOutput = {
+			type : 'SSML',
+			speech : mp3URL
+		};
+		response.tellWithCard(speechOutput);
+	},
 	"LyricsIntent" : function(intent, session, response) {
 		var userId = session.user.userId;
 		var songId;
