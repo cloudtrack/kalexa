@@ -1,5 +1,6 @@
 what is your name.
 my professor is an intelligent man.
+our professor is an intelligent man.
 this is a sample.
 apple
 baby
