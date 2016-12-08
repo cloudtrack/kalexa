@@ -12,6 +12,9 @@
         {
             "intent": "AMAZON.StopIntent"
         },
+		{
+			"intent": "ClosingIntent"
+		},
         {
           "intent" : "LyricsIntent",
           "slots" : [

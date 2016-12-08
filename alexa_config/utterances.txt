@@ -1,6 +1,11 @@
 AMAZON.StopIntent Stop.
 AMAZON.StopIntent Never mind.
-AMAZON.StopIntent I hate you.
+AMAZON.StopIntent We are done.
+AMAZON.StopIntent We are done here.
+
+ClosingIntent This is the end of our presentation.
+ClosingIntent This is end of our presentation.
+ClosingIntent This is the end of my presentation.
 
 LyricsIntent What's the lyrics of {Nth} song
 LyricsIntent What is the lyrics of {Nth} song
@@ -32,6 +37,7 @@ ChartIntent K-pop chart
 ChartIntent Who is the {Nth} artist.
 
 OtherSongIntent Let me know other song of {Nth} artist
+OtherSongIntent Let me know the other song of {Nth} artist
 
 TranslateIntent {Sentence} in Korean
 TranslateIntent Translate {Sentence}
@@ -47,6 +53,7 @@ PlaySongIntent Play {Nth} artist's song {NotinChart}
 
 CollaborationFilteringIntent Recommend me any song
 
+QuizIntent Give me {Number} quiz.
 QuizIntent Give me {Number} quizzes.
 
 QuizAnswerIntent The answer is {Answer}
