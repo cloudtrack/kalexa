@@ -85,7 +85,7 @@ exports.handler = function(event, context, callback) {
 							var idx = i;
 							if(p.userId === userId) { 
 								mostPlayedSong = getMostPlayedSongInPlaylist(p.songs);
-								var recommendUserIdx = -1;
+								var recommendUserIdx = 0;
 
 								// find user whose most played song issame as current user's
 								for(var i = 0 ; i < playlists.length ; i++) {
@@ -110,17 +110,6 @@ exports.handler = function(event, context, callback) {
 										break;
 									}
 								}
-								if(recommendUserIdx === -1) { // random user's
-									var random_idx = Math.floor(Math.random()*playlists.length);
-
-									var playlist = playlists[random_idx];
-									if(playlist && playlist.songs) { // 
-										var songs = playlist.songs;
-										cb(null, songs);
-									} else {
-										cb(null); // default song
-									}
-								}
 								break;
 							}
 						}
@@ -140,7 +129,7 @@ exports.handler = function(event, context, callback) {
 							var idx = i;
 							if(p.userId === userId) { 
 								favoriteArtist = getFavoriteArtistInPlaylist(p.songs);
-								var recommendUserIdx = -1;
+								var recommendUserIdx = 0;
 								// find user whose favorite artist is same as current user's
 								for(var i = 0 ; i < playlists.length ; i++) {
 									var p = playlists[i];
@@ -159,46 +148,32 @@ exports.handler = function(event, context, callback) {
 										break;
 									}
 								}
-								if(recommendUserIdx === -1) { // random user's
-									var random_idx = Math.floor(Math.random()*playlists.length);
-
-									var playlist = playlists[random_idx];
-									if(playlist && playlist.songs) { // 
-										var songs = playlist.songs;
-										cb(null, songs);
-									} else {
-										cb(null); // default song
-									}
-								}
 								break;
 							}
 						}
+
+
 					});
 				}
 			}, function(songs, cb) {
 				console.log('songs', songs)
-				if(songs) {
-					var type = Math.floor(Math.random() * 4);
-					console.log('song type', type);
-					if(type === 0) { // most recent played
-						songId = songs[songs.length - 1].songId;
-						cb(null);
-					} else if(type === 1) { // random
-						var random_idx = Math.floor(Math.random()*songs.length);
-						songId = songs[random_idx].songId;
-						cb(null);
-					} else if(type === 2) { // favoriteArtist's other songs
-						var favoriteArtist = getFavoriteArtistInPlaylist(songs);
-						songs.forEach(function(song, idx) {
-							if(song.artistId === favoriteArtist) songId = song.songId;
-						});
-					} else { // most played
-						songId = getMostPlayedSongInPlaylist(songs);
-						cb(null);
+					if(songs) {
+						var type = Math.floor(Math.random() * 3);
+						console.log('song type', type);
+						if(type === 0) { // most recent played
+							songId = songs[songs.length - 1].songId;
+							cb(null);
+						} else if(type === 1) { // random
+							var random_idx = Math.floor(Math.random()*songs.length);
+							songId = songs[random_idx].songId;
+							cb(null);
+						} else { // most played
+							songId = getMostPlayedSongInPlaylist(songs);
+							cb(null);
+						}
+					} else {
+						cb(null); // default song
 					}
-				} else {
-					cb(null); // default song
-				}
 			}
 	], function(err, result) {
 		if(err) {
