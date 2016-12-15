@@ -49,157 +49,147 @@ exports.handler = function(event, context, callback) {
 	var userId = event.userId;
 	var songId = DEFAULT_SONG; // default songs
 	async.waterfall([
-			function(cb) {
-				var playlistType = Math.floor(Math.random()*3); // 3 recommendations
-				console.log('playlist', playlistType);
-				if(playlistType === 0) { // random user's playlist
-					db.scan({ 
-						TableName : 'kpop_playlist'
-					}, function(err, data) {
-						if(err) {
-							cb(null); // default song
-						}
-						var playlists = data.Items;
-						var random_idx = Math.floor(Math.random()*playlists.length);
-
-						var playlist = playlists[random_idx];
-						if(playlist && playlist.songs) { // 
-							var songs = playlist.songs;
-							cb(null, songs);
-						} else {
-							cb(null); // default song
-						}
-					});
-				} else if(playlistType === 1) { // same favorite song user's
-					db.scan({ 
-						TableName : 'kpop_playlist'
-					}, function(err, data) {
-						if(err) {
-							cb(null); // default song
-						}
-						var playlists = data.Items;
-						var mostPlayedSong = DEFAULT_SONG;
-						// get current user's most played song
-						for(var i = 0 ; i < playlists.length ; i++) {
-							var p = playlists[i]; 
-							var idx = i;
-							if(p.userId === userId) { 
-								mostPlayedSong = getMostPlayedSongInPlaylist(p.songs);
-								var recommendUserIdx = -1;
-
-								// find user whose most played song issame as current user's
-								for(var i = 0 ; i < playlists.length ; i++) {
-									var p = playlists[i]; 
-									var idx = i;
-									var userMostPlayed = getMostPlayedSongInPlaylist(p.songs);
-									console.log(userMostPlayed);
-									if(userMostPlayed === mostPlayedSong) {
-										recommendUserIdx = idx;
-										var playlist = playlists[recommendUserIdx];
-										if(playlist && playlist.songs) { // 
-											var songs = playlist.songs;
-
-											// remove most played song from the list, to prevent recommendation is same all the time
-											songs.forEach(function(song, idx) {
-												if(song.songId === mostPlayedSong) delete songs[idx];
-											});
-											cb(null, songs);
-										} else {
-											cb(null); // default song
-										}
-										break;
-									}
-								}
-								if(recommendUserIdx === -1) { // random user's
-									var random_idx = Math.floor(Math.random()*playlists.length);
-
-									var playlist = playlists[random_idx];
-									if(playlist && playlist.songs) { // 
-										var songs = playlist.songs;
-										cb(null, songs);
-									} else {
-										cb(null); // default song
-									}
-								}
-								break;
-							}
-						}
-					});
-				} else { // same favoirte artist user's
-					db.scan({ 
-						TableName : 'kpop_playlist'
-					}, function(err, data) {
-						if(err) {
-							cb(null); // default song
-						}
-						var playlists = data.Items;
-						var favoriteArtist;
-						// get current user's most played song
-						for(var i = 0 ; i < playlists.length ; i++) {
-							var p = playlists[i];
-							var idx = i;
-							if(p.userId === userId) { 
-								favoriteArtist = getFavoriteArtistInPlaylist(p.songs);
-								var recommendUserIdx = -1;
-								// find user whose favorite artist is same as current user's
-								for(var i = 0 ; i < playlists.length ; i++) {
-									var p = playlists[i];
-									var idx = i;
-									var userFavoriteArtist = getFavoriteArtistInPlaylist(p.songs);
-									if(userFavoriteArtist === favoriteArtist) {
-										recommendUserIdx = idx;
-
-										var playlist = playlists[recommendUserIdx];
-										if(playlist && playlist.songs) { // 
-											var songs = playlist.songs;
-											cb(null, songs);
-										} else {
-											cb(null); // default song
-										} 
-										break;
-									}
-								}
-								if(recommendUserIdx === -1) { // random user's
-									var random_idx = Math.floor(Math.random()*playlists.length);
-
-									var playlist = playlists[random_idx];
-									if(playlist && playlist.songs) { // 
-										var songs = playlist.songs;
-										cb(null, songs);
-									} else {
-										cb(null); // default song
-									}
-								}
-								break;
-							}
-						}
-					});
-				}
-			}, function(songs, cb) {
-				console.log('songs', songs)
-				if(songs) {
-					var type = Math.floor(Math.random() * 4);
-					console.log('song type', type);
-					if(type === 0) { // most recent played
-						songId = songs[songs.length - 1].songId;
-						cb(null);
-					} else if(type === 1) { // random
-						var random_idx = Math.floor(Math.random()*songs.length);
-						songId = songs[random_idx].songId;
-						cb(null);
-					} else if(type === 2) { // favoriteArtist's other songs
-						var favoriteArtist = getFavoriteArtistInPlaylist(songs);
-						songs.forEach(function(song, idx) {
-							if(song.artistId === favoriteArtist) songId = song.songId;
-						});
-					} else { // most played
-						songId = getMostPlayedSongInPlaylist(songs);
-						cb(null);
+		function(cb) { // select playlist
+			var playlistType = Math.floor(Math.random()*2); // 2 recommendations
+			console.log('playlist', playlistType);
+			
+			if(playlistType === 0) { // same favorite song user's
+				db.scan({ 
+					TableName : 'kpop_playlist'
+				}, function(err, data) {
+					if(err) {
+						cb(null); // default song
 					}
-				} else {
-					cb(null); // default song
-				}
+					var playlists = data.Items;
+					var mostPlayedSong = DEFAULT_SONG;
+					// get current user's most played song
+					for(var i = 0 ; i < playlists.length ; i++) {
+						var p = playlists[i]; 
+						var idx = i;
+						if(p.userId === userId) { 
+							mostPlayedSong = getMostPlayedSongInPlaylist(p.songs);
+							var recommendUserIdx = -1;
+
+							// find user whose most played song issame as current user's
+							for(var i = 0 ; i < playlists.length ; i++) {
+								var p = playlists[i]; 
+								var idx = i;
+								var userMostPlayed = getMostPlayedSongInPlaylist(p.songs);
+								console.log(userMostPlayed);
+								if(userMostPlayed === mostPlayedSong) {
+									recommendUserIdx = idx;
+									var playlist = playlists[recommendUserIdx];
+									if(playlist && playlist.songs) { // 
+										var songs = playlist.songs;
+
+										// remove most played song from the list, to prevent recommendation is same all the time
+										songs.forEach(function(song, idx) {
+											if(song.songId === mostPlayedSong) delete songs[idx];
+										});
+										cb(null, songs);
+									} else {
+										cb(null); // default song
+									}
+									break;
+								}
+							}
+							if(recommendUserIdx === -1) { // random user's
+								var random_idx = Math.floor(Math.random()*playlists.length);
+
+								var playlist = playlists[random_idx];
+								if(playlist && playlist.songs) { // 
+									var songs = playlist.songs;
+									cb(null, songs);
+								} else {
+									cb(null); // default song
+								}
+							}
+							break;
+						}
+					}
+				});
+			} else { // same favoirte artist user's
+				db.scan({ 
+					TableName : 'kpop_playlist'
+				}, function(err, data) {
+					if(err) {
+						cb(null); // default song
+					}
+					var playlists = data.Items;
+					var favoriteArtist;
+					// get current user's most played song
+					for(var i = 0 ; i < playlists.length ; i++) {
+						var p = playlists[i];
+						var idx = i;
+						if(p.userId === userId) { 
+							favoriteArtist = getFavoriteArtistInPlaylist(p.songs);
+							var recommendUserIdx = -1;
+							// find user whose favorite artist is same as current user's
+							for(var i = 0 ; i < playlists.length ; i++) {
+								var p = playlists[i];
+								var idx = i;
+								var userFavoriteArtist = getFavoriteArtistInPlaylist(p.songs);
+								if(userFavoriteArtist === favoriteArtist) {
+									recommendUserIdx = idx;
+
+									var playlist = playlists[recommendUserIdx];
+									if(playlist && playlist.songs) { // 
+										var songs = playlist.songs;
+										cb(null, songs);
+									} else {
+										cb(null); // default song
+									} 
+									break;
+								}
+							}
+							if(recommendUserIdx === -1) { // random user's
+								var random_idx = Math.floor(Math.random()*playlists.length);
+
+								var playlist = playlists[random_idx];
+								if(playlist && playlist.songs) { // 
+									var songs = playlist.songs;
+									cb(null, songs);
+								} else {
+									cb(null); // default song
+								}
+							}
+							break;
+						}
+					}
+				});
 			}
+		}, function(songs, cb) { // select song in playlist
+			if(songs) {
+				var type = Math.floor(Math.random() * 4);
+				console.log('song type', type);
+				if(type === 0) { // most recent played
+					songId = songs[songs.length - 1].songId;
+					cb(null);
+				} else if(type === 1) { // random
+					var random_idx = Math.floor(Math.random()*songs.length);
+					songId = songs[random_idx].songId;
+					cb(null);
+				} else if(type === 2) { // favoriteArtist's random songs
+					var favoriteArtist = getFavoriteArtistInPlaylist(songs);
+					var artistSongs = [];
+					songs.forEach(function(song, idx) {
+						if(song.artistId == favoriteArtist) 
+						    artistSongs.push(song.songId);
+						
+						if(idx === songs.length - 1) {
+        					var random_idx = Math.floor(Math.random()*artistSongs.length);
+        					songId = artistSongs[random_idx];
+        					cb(null);
+						}
+					});
+				} else { // most played
+					songId = getMostPlayedSongInPlaylist(songs);
+					cb(null);
+				}
+			} else {
+				cb(null); // default song
+			}
+		}
 	], function(err, result) {
 		if(err) {
 			console.log(err);
@@ -211,3 +201,4 @@ exports.handler = function(event, context, callback) {
 }
 
 //exports.handler();
+
