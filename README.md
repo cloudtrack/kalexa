@@ -7,6 +7,7 @@ This is the Alexa Skill for Amazon Echo with as following features.
 
 ## Architecture 
 It used AWS Lambda, Google Translate API, Naver Text to Speech API, Melon API and ffmpeg technology. 
+<img src="docs/kalexa-diagram.png" width="500" alt="*">
 
 ## Features 
 You can ask as following questions.
@@ -24,3 +25,4 @@ We improved some of performances
 * Latency in API calls: Reduce calls, Dummy worker, Caching
 * Lambda Initialization: User library tuning to Amazon Linux
 * Lambda Execution: efficient code, MP3 caching and using Redis – In-memory Cache
+<img src="docs/kalexa-performance.png" width="500" alt="*">
