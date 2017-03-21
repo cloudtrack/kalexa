@@ -26,3 +26,5 @@ We improved some of performances
 * Lambda Initialization: User library tuning to Amazon Linux
 * Lambda Execution: efficient code, MP3 caching and using Redis – In-memory Cache
 <img src="docs/kalexa-performance.png" width="500" alt="*">
+
+<small>N: Naver, G: Google</small>
